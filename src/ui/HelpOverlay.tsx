@@ -1,0 +1,53 @@
+import { WORLD_NAME } from "../data/config";
+import { TOTAL_RELICS } from "../data/projects";
+import { useGameStore } from "../store/useGameStore";
+import Modal from "./Modal";
+
+/** Controls + about (F: controls discoverability). Device-aware. */
+export default function HelpOverlay({ touch }: { touch: boolean }) {
+  const toggleHelp = useGameStore((s) => s.toggleHelp);
+  const openRecruiter = useGameStore((s) => s.openRecruiter);
+
+  const controls: [string, string][] = touch
+    ? [
+        ["Move", "Drag the joystick (bottom-left)"],
+        ["Inspect", "Tap a glowing building, then the prompt"],
+        ["Map", "Tap the map icon (top-right)"],
+        ["Help", "Tap the “?” icon"],
+      ]
+    : [
+        ["Move", "W A S D or arrow keys"],
+        ["Inspect", "E or Enter near a relic"],
+        ["Fast travel", "M"],
+        ["Help", "?"],
+        ["Pause / close", "Esc"],
+      ];
+
+  return (
+    <Modal title="How to play" subtitle={WORLD_NAME} onClose={toggleHelp} maxWidth="max-w-lg">
+      <div className="flex flex-col gap-5">
+        <p className="text-sm leading-relaxed text-realm-muted">
+          Walk the realm and inspect each glowing building to uncover its project. Gather all{" "}
+          {TOTAL_RELICS} relics to open the Gate of Contact to the south.
+        </p>
+
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
+          {controls.map(([k, v]) => (
+            <div key={k} className="flex items-baseline justify-between gap-3 border-b border-realm-edge/60 py-1.5">
+              <dt className="font-display text-sm font-semibold text-realm-text">{k}</dt>
+              <dd className="text-right text-sm text-realm-muted">{v}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="rounded-xl border border-realm-edge bg-realm-panelHi/40 px-4 py-3 text-sm text-realm-muted">
+          In a hurry?{" "}
+          <button onClick={openRecruiter} className="font-semibold text-realm-gold underline-offset-2 hover:underline">
+            Recruiter mode
+          </button>{" "}
+          drops you into a clean index of every project, résumé, and contact — no game required.
+        </div>
+      </div>
+    </Modal>
+  );
+}

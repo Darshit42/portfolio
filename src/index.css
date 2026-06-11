@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    background-color: theme("colors.realm.bg");
+    color: theme("colors.realm.text");
+    font-family: theme("fontFamily.body");
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  /* Visible focus for keyboard users across all overlays (a11y requirement). */
+  :focus-visible {
+    outline: 2px solid theme("colors.realm.gold");
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: theme("colors.realm.gold");
+    color: theme("colors.realm.bg");
+  }
+}
+
+@layer components {
+  .panel {
+    @apply border border-realm-edge bg-realm-panel/95 backdrop-blur-md;
+  }
+
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-realm-gold;
+  }
+
+  .btn-primary {
+    @apply btn bg-realm-gold text-realm-bg hover:bg-realm-gold/90 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply btn border border-realm-edge bg-realm-panelHi/60 text-realm-text hover:border-realm-gold/60 hover:bg-realm-panelHi active:scale-[0.98];
+  }
+
+  .tag {
+    @apply inline-flex items-center rounded-full border border-realm-edge bg-realm-panelHi/70 px-2.5 py-0.5 text-xs font-medium text-realm-muted;
+  }
+}
+
+/* Respect reduced motion globally as a safety net beyond JS checks. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Thin custom scrollbar for overlay panels. */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.realm.edge") transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: theme("colors.realm.edge");
+  border-radius: 8px;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
