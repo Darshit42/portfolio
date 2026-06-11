@@ -14,6 +14,8 @@ import HelpOverlay from "../ui/HelpOverlay";
 import PauseOverlay from "../ui/PauseOverlay";
 import Joystick from "../ui/Joystick";
 import ControlsHint from "../ui/ControlsHint";
+import Minimap from "../ui/Minimap";
+import Toasts from "../ui/Toasts";
 
 /**
  * Composition root for a world-family mode: the 3D <World> canvas plus the DOM
@@ -76,6 +78,8 @@ export default function GameRoot() {
       {/* persistent UI */}
       <TopBar />
       <HUD />
+      {FEATURES.minimap && <Minimap />}
+      <Toasts />
 
       {/* contextual */}
       {mode === "playing" && <InteractPrompt />}
