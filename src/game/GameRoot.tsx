@@ -16,6 +16,7 @@ import Joystick from "../ui/Joystick";
 import ControlsHint from "../ui/ControlsHint";
 import Minimap from "../ui/Minimap";
 import Toasts from "../ui/Toasts";
+import AudioManager from "../audio/AudioManager";
 
 /**
  * Composition root for a world-family mode: the 3D <World> canvas plus the DOM
@@ -79,6 +80,7 @@ export default function GameRoot() {
       <TopBar />
       <HUD />
       {FEATURES.minimap && <Minimap />}
+      {FEATURES.audio && <AudioManager />}
       <Toasts />
 
       {/* contextual */}

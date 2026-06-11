@@ -34,12 +34,12 @@ export const OWNER: Owner = {
  */
 export const FEATURES = {
   combat: false, //   P1 (F13–F15, F17)
-  audio: false, //    P1 (F20)
+  audio: true, //     P1 (F20)
   interiors: false, // P1 (F18)
   minimap: true, //   P1 (F19)
   tts: true, //       P1 (F21) — Voice Oracle reads its blurb
   liveAgentWs: false, // P2 (F24) — real agent feed over WebSocket
-  localSave: false, // P2 (F22)
+  localSave: true, //  P2 (F22)
   particles: true, //  P2 (F23) — cheap glow/sparks, always gated by reduced-motion
 } as const;
 

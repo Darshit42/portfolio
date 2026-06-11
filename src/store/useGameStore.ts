@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { SPAWN } from "../data/buildings";
 import { TOTAL_RELICS } from "../data/projects";
+import { loadSaved, persist } from "./persist";
+
+const saved = loadSaved();
+const prefersReducedMotion =
+  typeof window !== "undefined" &&
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 
 export type UiMode =
   | "title"
@@ -87,7 +93,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   mode: "title",
   returnMode: "playing",
 
-  foundRelics: new Set(),
+  foundRelics: new Set(saved.foundRelics ?? []),
   discovered: new Set(),
 
   activeCodex: null,
@@ -99,10 +105,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   travelTarget: null,
   spawn: SPAWN,
 
-  muted: true, // audio is "default-soft" per PRD; user opts in
-  reducedMotion:
-    typeof window !== "undefined" &&
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true,
+  muted: saved.muted ?? true, // audio is "default-soft" per PRD; user opts in
+  reducedMotion: saved.reducedMotion ?? prefersReducedMotion,
   webglFailed: false,
   hasSeenControls: false,
 
@@ -200,3 +204,13 @@ export const useGameStore = create<GameState>((set, get) => ({
 
 /** Derived selector: are all relics found? */
 export const selectGateOpen = (s: GameState): boolean => s.foundRelics.size >= TOTAL_RELICS;
+
+// Persist relics + settings locally (F22). The persist() helper no-ops unless
+// the flag is on and only writes when the snapshot actually changes.
+useGameStore.subscribe((s) =>
+  persist({
+    foundRelics: [...s.foundRelics],
+    muted: s.muted,
+    reducedMotion: s.reducedMotion,
+  }),
+);
