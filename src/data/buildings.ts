@@ -40,7 +40,10 @@ export interface Building {
   interior?: boolean; // P1
 }
 
-export const SPAWN: [number, number] = [0, 30];
+// Just north of (in front of) the Tavern, clear of its footprint, facing the
+// plaza/world. The Tavern occupies z 27–37, so spawning at 30 would embed the
+// player in a wall.
+export const SPAWN: [number, number] = [0, 23];
 export const PLAZA_CENTER: [number, number] = [0, 2];
 
 /** World bounds (player is clamped inside, with a margin from the edge). */

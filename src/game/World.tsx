@@ -6,7 +6,9 @@ import Decor from "./Decor";
 import Buildings from "./Buildings";
 import PlazaTotem from "./PlazaTotem";
 import Player from "./Player";
+import Particles from "./Particles";
 import { isTouchDevice } from "./webgl";
+import { FEATURES } from "../data/config";
 
 /**
  * The R3F scene. Shadows + higher DPR on desktop; trimmed on touch devices to
@@ -51,6 +53,7 @@ export default function World() {
         <Buildings />
         <PlazaTotem />
         <Player />
+        {FEATURES.particles && !touch && <Particles />}
       </Suspense>
 
       <FollowCamera />

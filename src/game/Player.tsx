@@ -96,7 +96,7 @@ export default function Player() {
   });
 
   return (
-    <group ref={group} position={[playerState.pos.x, 0, playerState.pos.z]}>
+    <group ref={group} position={[playerState.pos.x, 0, playerState.pos.z]} rotation-y={playerState.facing}>
       {/* contact shadow */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0]}>
         <circleGeometry args={[0.85, 20]} />
