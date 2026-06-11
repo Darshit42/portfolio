@@ -9,6 +9,7 @@ import TopBar from "../ui/TopBar";
 import InteractPrompt from "../ui/InteractPrompt";
 import CodexModal from "../ui/CodexModal";
 import ContactModal from "../ui/ContactModal";
+import DialogBox from "../ui/DialogBox";
 import FastTravel from "../ui/FastTravel";
 import HelpOverlay from "../ui/HelpOverlay";
 import PauseOverlay from "../ui/PauseOverlay";
@@ -90,6 +91,7 @@ export default function GameRoot() {
 
       {/* overlays */}
       {mode === "codex" && (activeGate ? <ContactModal /> : <CodexModal />)}
+      {mode === "dialog" && <DialogBox />}
       {mode === "fasttravel" && <FastTravel />}
       {mode === "help" && <HelpOverlay touch={touch} />}
       {mode === "paused" && <PauseOverlay />}

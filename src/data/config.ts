@@ -35,6 +35,7 @@ export const OWNER: Owner = {
 export const FEATURES = {
   combat: false, //   P1 (F13–F15, F17)
   audio: true, //     P1 (F20)
+  npcs: true, //      P1 (F16) — barkeep / guildmaster / oracle dialog
   interiors: false, // P1 (F18)
   minimap: true, //   P1 (F19)
   tts: true, //       P1 (F21) — Voice Oracle reads its blurb

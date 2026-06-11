@@ -2,6 +2,8 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import { BUILDINGS } from "../data/buildings";
+import { NPCS } from "../data/npcs";
+import { FEATURES } from "../data/config";
 import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameStore";
 import { playerState } from "./playerState";
 import { resolveMove } from "./collision";
@@ -32,9 +34,11 @@ export default function Player() {
   const group = useRef<Group>(null);
   const body = useRef<Group>(null);
 
-  // Precompute interaction points from data (relics, the forge, the gate).
+  // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
-    return BUILDINGS.filter((b) => b.projectId || b.kind === "gate").map((b) => {
+    const fromBuildings: InteractPoint[] = BUILDINGS.filter(
+      (b) => b.projectId || b.kind === "gate",
+    ).map((b) => {
       const kind = b.kind === "forge" ? "forge" : b.kind === "gate" ? "gate" : "relic";
       const prompt =
         kind === "forge" ? "Ignite the Forge" : kind === "gate" ? "Approach the Gate" : "Inspect relic";
@@ -43,6 +47,15 @@ export default function Player() {
         data: { kind, id: b.id, label: b.label, prompt, projectId: b.projectId },
       };
     });
+
+    const fromNpcs: InteractPoint[] = FEATURES.npcs
+      ? NPCS.map((n) => ({
+          point: n.position,
+          data: { kind: "npc", id: n.id, label: n.name, prompt: `Talk to ${n.name}` } as Interactable,
+        }))
+      : [];
+
+    return [...fromBuildings, ...fromNpcs];
   }, []);
 
   useFrame((_, delta) => {
