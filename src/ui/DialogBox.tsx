@@ -67,6 +67,7 @@ export default function DialogBox() {
   // Keyboard advance (Enter / Space / E).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (e.repeat) return;
       const k = e.key.toLowerCase();
       if (k === "enter" || k === " " || k === "e") {
         e.preventDefault();

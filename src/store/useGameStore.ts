@@ -27,15 +27,17 @@ export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel"
 /** Modes in which player input should be frozen (an overlay is up). */
 export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "title", "recruiter"];
 
-export type InteractableKind = "relic" | "gate" | "npc" | "forge";
+export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door";
 
 export interface Interactable {
   kind: InteractableKind;
-  /** building id, npc id, etc. */
+  /** building id, npc id, door id, etc. */
   id: string;
   label: string;
   prompt: string;
   projectId?: string;
+  /** Teleport destination for doors, [x, z]. */
+  target?: [number, number];
 }
 
 export interface GameState {
@@ -172,6 +174,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       case "npc":
         get().openDialog(n.id);
+        break;
+      case "door":
+        if (n.target) get().requestTravel(n.target);
         break;
     }
   },

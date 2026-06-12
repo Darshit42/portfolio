@@ -36,7 +36,7 @@ export const FEATURES = {
   combat: true, //    P1 (F13–F15, F17)
   audio: true, //     P1 (F20)
   npcs: true, //      P1 (F16) — barkeep / guildmaster / oracle dialog
-  interiors: false, // P1 (F18)
+  interiors: true, //  P1 (F18) — Tavern + Forge rooms via teleporting doors
   minimap: true, //   P1 (F19)
   tts: true, //       P1 (F21) — Voice Oracle reads its blurb
   liveAgentWs: false, // P2 (F24) — real agent feed over WebSocket

@@ -58,6 +58,9 @@ export function useKeyboardControls(opts: {
         recompute();
         return;
       }
+      // Action keys are edge-triggered: ignore OS key-repeat so holding E
+      // can't bounce through a door and holding Space can't machine-gun.
+      if (e.repeat) return;
       switch (k) {
         case "e":
         case "enter":

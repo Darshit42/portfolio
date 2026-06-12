@@ -26,7 +26,12 @@ export default function Minimap() {
     let raf = 0;
     const tick = () => {
       if (marker.current) {
-        const [px, py] = toMap(playerState.pos.x, playerState.pos.z);
+        const { x, z } = playerState.pos;
+        // Hide the marker while the player is in an interior (off this map).
+        const inWorld =
+          x >= WORLD_BOUNDS.minX - 2 && x <= WORLD_BOUNDS.maxX + 2 && z >= WORLD_BOUNDS.minZ - 2 && z <= WORLD_BOUNDS.maxZ + 2;
+        marker.current.setAttribute("visibility", inWorld ? "visible" : "hidden");
+        const [px, py] = toMap(x, z);
         const deg = (playerState.facing * 180) / Math.PI;
         marker.current.setAttribute("transform", `translate(${px} ${py}) rotate(${deg})`);
       }

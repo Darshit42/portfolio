@@ -3,7 +3,12 @@
  * each building's relic interaction point so an NPC and a relic never compete
  * for the same proximity prompt. Each NPC can branch into "tell me more" →
  * opens the related project Codex.
+ *
+ * With interiors enabled, the Barkeep stands behind the bar inside the Tavern
+ * and the Automaton works the Forge room; with interiors off they fall back to
+ * (or are dropped from) the exterior.
  */
+import { FEATURES } from "./config";
 
 export interface NpcDialogLine {
   text: string;
@@ -30,8 +35,9 @@ export const NPCS: Npc[] = [
     id: "barkeep",
     name: "The Barkeep",
     building: "null-pointer-tavern",
-    position: [4, 25],
-    facing: Math.PI * 0.85,
+    // Behind the bar when interiors exist; greeting at the door otherwise.
+    position: FEATURES.interiors ? [153.9, 58.8] : [4, 25],
+    facing: FEATURES.interiors ? Math.PI / 2 : Math.PI * 0.85,
     accent: "#e8c66a",
     lines: [
       { text: "Welcome to the Null Pointer, traveller. Mind the dangling references." },
@@ -39,6 +45,24 @@ export const NPCS: Npc[] = [
       { text: "In a hurry? There's a recruiter's door up top — straight to the good stuff." },
     ],
   },
+  ...(FEATURES.interiors
+    ? ([
+        {
+          id: "automaton",
+          name: "The Automaton",
+          building: "agent-forge",
+          projectId: "self-healing-agent",
+          position: [161.2, -59.3],
+          facing: -1.2,
+          accent: "#ff7a3c",
+          lines: [
+            { text: "Forged to mend what the makers abandon. I read the trace, shape the patch, and send the scroll." },
+            { text: "Every verified fix feeds the policy. I am better today than yesterday; tomorrow, better still." },
+            { text: "Would you see my maker's design?" },
+          ],
+        },
+      ] satisfies Npc[])
+    : []),
   {
     id: "guildmaster",
     name: "The Guildmaster",

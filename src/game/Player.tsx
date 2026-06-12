@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { BUILDINGS } from "../data/buildings";
 import { NPCS } from "../data/npcs";
+import { DOORS } from "../data/interiors";
 import { FEATURES } from "../data/config";
 import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameStore";
 import { playerState } from "./playerState";
@@ -57,7 +58,14 @@ export default function Player() {
         }))
       : [];
 
-    return [...fromBuildings, ...fromNpcs];
+    const fromDoors: InteractPoint[] = FEATURES.interiors
+      ? DOORS.map((d) => ({
+          point: d.position,
+          data: { kind: "door", id: d.id, label: d.label, prompt: d.prompt, target: d.target } as Interactable,
+        }))
+      : [];
+
+    return [...fromBuildings, ...fromNpcs, ...fromDoors];
   }, []);
 
   useFrame((_, delta) => {

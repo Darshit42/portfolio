@@ -8,6 +8,7 @@ import PlazaTotem from "./PlazaTotem";
 import Player from "./Player";
 import Npcs from "./Npcs";
 import Enemies from "./Enemies";
+import Interior from "./Interior";
 import Particles from "./Particles";
 import { isTouchDevice } from "./webgl";
 import { FEATURES } from "../data/config";
@@ -56,6 +57,7 @@ export default function World() {
         <PlazaTotem />
         {FEATURES.npcs && <Npcs />}
         {FEATURES.combat && <Enemies />}
+        {FEATURES.interiors && <Interior />}
         <Player />
         {FEATURES.particles && !touch && <Particles />}
       </Suspense>
