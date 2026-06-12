@@ -125,3 +125,12 @@ export function sfxGate(): void {
 export function sfxBlip(): void {
   tone(523.25, 0.08, "square", 0, 0.1);
 }
+
+export function sfxHit(): void {
+  tone(196, 0.1, "square", 0, 0.16);
+  tone(98, 0.14, "triangle", 0.02, 0.14);
+}
+
+export function sfxHurt(): void {
+  tone(160, 0.18, "sawtooth", 0, 0.14);
+}

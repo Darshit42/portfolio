@@ -98,6 +98,14 @@ export const ArrowRightIcon = (p: P) => (
   </svg>
 );
 
+export const SwordIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M14.5 4H20v5.5L9.5 20l-2.5.5.5-2.5L18 7.5" />
+    <path d="m14.5 9.5 0 0M5 16l3 3M3.5 17.5 6.5 20.5" />
+    <path d="M6.5 13.5 4 16l4 4 2.5-2.5" />
+  </svg>
+);
+
 export const RelicIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M12 2 4 7v10l8 5 8-5V7l-8-5Z" />

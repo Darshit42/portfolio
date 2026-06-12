@@ -16,12 +16,14 @@ export default function HelpOverlay({ touch }: { touch: boolean }) {
     ? [
         ["Move", "Drag the joystick (bottom-left)"],
         ["Inspect", "Tap a glowing building, then the prompt"],
+        ...(FEATURES.combat ? ([["Attack", "Tap the sword button (bottom-right)"]] as [string, string][]) : []),
         ["Map", "Tap the map icon (top-right)"],
         ["Help", "Tap the “?” icon"],
       ]
     : [
         ["Move", "W A S D or arrow keys"],
         ["Inspect", "E or Enter near a relic"],
+        ...(FEATURES.combat ? ([["Attack", "Space — swat the bugs"]] as [string, string][]) : []),
         ["Fast travel", "M"],
         ["Help", "?"],
         ["Pause / close", "Esc"],

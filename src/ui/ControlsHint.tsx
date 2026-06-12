@@ -21,7 +21,7 @@ export default function ControlsHint({ touch }: { touch: boolean }) {
         <span>
           {touch
             ? "Drag the joystick to move · tap a glowing building to inspect"
-            : "WASD / arrows to move · press E to inspect · M for the map"}
+            : "WASD to move · E to inspect · Space to swat bugs · M for the map"}
         </span>
         <button onClick={mark} className="shrink-0 text-xs font-semibold text-realm-gold">
           Got it

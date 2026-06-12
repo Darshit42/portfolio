@@ -33,7 +33,7 @@ export const OWNER: Owner = {
  * MVP (M0+M1) ships with combat/audio/interiors OFF.
  */
 export const FEATURES = {
-  combat: false, //   P1 (F13–F15, F17)
+  combat: true, //    P1 (F13–F15, F17)
   audio: true, //     P1 (F20)
   npcs: true, //      P1 (F16) — barkeep / guildmaster / oracle dialog
   interiors: false, // P1 (F18)

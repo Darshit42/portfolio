@@ -11,9 +11,9 @@ interface Rect {
 
 const PLAYER_RADIUS = 0.9;
 
-// Static collider registry, built once from building footprints. Buildings are
-// unique and never move, so a flat array + linear scan is plenty (n < 10).
-const colliders: Rect[] = BUILDINGS.map((b) => ({
+// Static collider registry, built once from solid building footprints.
+// Buildings are unique and never move, so a flat array + linear scan is plenty.
+const colliders: Rect[] = BUILDINGS.filter((b) => b.solid !== false).map((b) => ({
   minX: b.position[0] - b.half[0],
   maxX: b.position[0] + b.half[0],
   minZ: b.position[1] - b.half[1],

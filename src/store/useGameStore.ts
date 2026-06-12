@@ -1,7 +1,10 @@
 import { create } from "zustand";
-import { SPAWN } from "../data/buildings";
+import { SPAWN, buildingById } from "../data/buildings";
 import { TOTAL_RELICS } from "../data/projects";
 import { loadSaved, persist } from "./persist";
+
+export const MAX_HEALTH = 5;
+export const ARENA_WAVES = 3;
 
 const saved = loadSaved();
 const prefersReducedMotion =
@@ -62,6 +65,16 @@ export interface GameState {
   webglFailed: boolean;
   hasSeenControls: boolean;
 
+  // ---- combat (F13–F15, F17) ----
+  health: number;
+  maxHealth: number;
+  arenaActive: boolean;
+  arenaWave: number;
+
+  // ---- transient notice (death / arena messages) ----
+  noticeText: string | null;
+  noticeKey: number;
+
   // ---- actions ----
   setMode: (m: UiMode) => void;
   enterRealm: () => void;
@@ -87,6 +100,13 @@ export interface GameState {
   setReducedMotion: (v: boolean) => void;
   setWebglFailed: () => void;
   markControlsSeen: () => void;
+
+  damagePlayer: (n: number) => void;
+  healToFull: () => void;
+  startArena: () => void;
+  stopArena: () => void;
+  setArenaWave: (w: number) => void;
+  notify: (text: string) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -109,6 +129,14 @@ export const useGameStore = create<GameState>((set, get) => ({
   reducedMotion: saved.reducedMotion ?? prefersReducedMotion,
   webglFailed: false,
   hasSeenControls: false,
+
+  health: MAX_HEALTH,
+  maxHealth: MAX_HEALTH,
+  arenaActive: false,
+  arenaWave: 0,
+
+  noticeText: null,
+  noticeKey: 0,
 
   setMode: (m) => set({ mode: m }),
 
@@ -200,6 +228,33 @@ export const useGameStore = create<GameState>((set, get) => ({
   setReducedMotion: (v) => set({ reducedMotion: v }),
   setWebglFailed: () => set({ webglFailed: true, mode: "recruiter" }),
   markControlsSeen: () => set({ hasSeenControls: true }),
+
+  notify: (text) => set((s) => ({ noticeText: text, noticeKey: s.noticeKey + 1 })),
+
+  damagePlayer: (n) => {
+    const next = get().health - n;
+    if (next > 0) {
+      set({ health: next });
+      return;
+    }
+    // Death is generous: full heal + respawn at the Tavern, no death screen.
+    const wasArena = get().arenaActive;
+    set({ health: get().maxHealth, arenaActive: false, arenaWave: 0 });
+    get().requestTravel(get().spawn);
+    get().notify(wasArena ? "The Arena bested you — back to the Tavern" : "You fell — back to the Tavern");
+  },
+
+  healToFull: () => set((s) => ({ health: s.maxHealth })),
+
+  startArena: () => {
+    const arena = buildingById("the-arena");
+    set({ arenaActive: true, arenaWave: 1, health: get().maxHealth });
+    if (arena) get().requestTravel([arena.position[0], arena.position[1]]);
+    get().notify("The Arena — Wave 1");
+  },
+
+  stopArena: () => set({ arenaActive: false, arenaWave: 0 }),
+  setArenaWave: (w) => set({ arenaWave: w }),
 }));
 
 /** Derived selector: are all relics found? */

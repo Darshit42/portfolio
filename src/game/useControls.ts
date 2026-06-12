@@ -2,33 +2,13 @@ import { useEffect } from "react";
 
 /**
  * Unified movement input: keyboard (WASD + arrows) and the touch joystick feed
- * the same vectors, read each frame by <Player>. Interact is an edge-triggered,
- * consumable flag so a single key/tap fires exactly one interaction.
+ * the same vectors, read each frame by <Player>. Discrete actions (interact,
+ * attack, map, help, pause) are reported via callbacks so the DOM layer and the
+ * combat module own their own state.
  */
 
 export const keyboardVector = { x: 0, z: 0 };
 export const joystickVector = { x: 0, z: 0 };
-
-let interactQueued = false;
-let attackQueued = false;
-
-export function queueInteract() {
-  interactQueued = true;
-}
-export function consumeInteract(): boolean {
-  const v = interactQueued;
-  interactQueued = false;
-  return v;
-}
-
-export function queueAttack() {
-  attackQueued = true;
-}
-export function consumeAttack(): boolean {
-  const v = attackQueued;
-  attackQueued = false;
-  return v;
-}
 
 /** Combined, length-clamped movement direction in world XZ (camera-relative). */
 export function getMoveVector(): { x: number; z: number } {

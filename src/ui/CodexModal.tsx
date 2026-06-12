@@ -5,7 +5,7 @@ import Modal from "./Modal";
 import ForgeDemo from "./ForgeDemo";
 import { ProjectLinks, StackTags, TierBadge } from "./common";
 import { useTts } from "./tts";
-import { VolumeIcon, MuteIcon } from "./icons";
+import { VolumeIcon, MuteIcon, SwordIcon } from "./icons";
 
 /** Per-project Codex panel (F6). The flagship also embeds the live Forge demo. */
 export default function CodexModal() {
@@ -13,9 +13,12 @@ export default function CodexModal() {
   const activeForge = useGameStore((s) => s.activeForge);
   const close = useGameStore((s) => s.closeOverlay);
 
+  const startArena = useGameStore((s) => s.startArena);
   const tts = useTts();
   const project = id ? projectById(id) : undefined;
   if (!project) return null;
+
+  const canEnterArena = FEATURES.combat && project.building === "the-arena";
 
   const showForge = activeForge || project.demo?.type === "forge-live";
   // The Oracle speaks (F21): the voice-agent project can read its blurb aloud.
@@ -54,6 +57,17 @@ export default function CodexModal() {
           >
             {tts.speaking ? <MuteIcon width={16} height={16} /> : <VolumeIcon width={16} height={16} />}
             {tts.speaking ? "Stop the Oracle" : "Hear the Oracle speak"}
+          </button>
+        )}
+
+        {canEnterArena && (
+          <button
+            onClick={() => startArena()}
+            className="btn-ghost w-fit text-sm"
+            style={{ borderColor: `${project.accent}66`, color: project.accent }}
+          >
+            <SwordIcon width={16} height={16} />
+            Enter the Arena — survive the waves
           </button>
         )}
 

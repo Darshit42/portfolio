@@ -17,7 +17,11 @@ import Joystick from "../ui/Joystick";
 import ControlsHint from "../ui/ControlsHint";
 import Minimap from "../ui/Minimap";
 import Toasts from "../ui/Toasts";
+import NoticeToast from "../ui/NoticeToast";
+import DamageVignette from "../ui/DamageVignette";
+import AttackButton from "../ui/AttackButton";
 import AudioManager from "../audio/AudioManager";
+import { doAttack } from "./combat";
 
 /**
  * Composition root for a world-family mode: the 3D <World> canvas plus the DOM
@@ -61,7 +65,7 @@ export default function GameRoot() {
       },
       onAttack: () => {
         if (!FEATURES.combat) return;
-        // combat handled in M2
+        if (useGameStore.getState().mode === "playing") doAttack();
       },
     }),
     [],
@@ -82,11 +86,14 @@ export default function GameRoot() {
       <HUD />
       {FEATURES.minimap && <Minimap />}
       {FEATURES.audio && <AudioManager />}
+      {FEATURES.combat && <DamageVignette />}
       <Toasts />
+      <NoticeToast />
 
       {/* contextual */}
       {mode === "playing" && <InteractPrompt />}
       {touch && !overlayUp && <Joystick />}
+      {FEATURES.combat && touch && !overlayUp && <AttackButton />}
       <ControlsHint touch={touch} />
 
       {/* overlays */}

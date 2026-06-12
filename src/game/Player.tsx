@@ -1,6 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { Group } from "three";
+import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { BUILDINGS } from "../data/buildings";
 import { NPCS } from "../data/npcs";
 import { FEATURES } from "../data/config";
@@ -8,6 +8,7 @@ import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameS
 import { playerState } from "./playerState";
 import { resolveMove } from "./collision";
 import { getMoveVector } from "./useControls";
+import { combat } from "./combat";
 
 const SPEED = 9; // units / second
 const PROX = 3.6; // interaction radius from a building's approach point
@@ -33,6 +34,7 @@ function lerpAngle(a: number, b: number, t: number): number {
 export default function Player() {
   const group = useRef<Group>(null);
   const body = useRef<Group>(null);
+  const swing = useRef<Mesh>(null);
 
   // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
@@ -94,6 +96,19 @@ export default function Player() {
       body.current.position.y = moving && !st.reducedMotion ? Math.abs(Math.sin(t * 10)) * 0.12 : 0;
     }
 
+    // attack swing shockwave
+    if (swing.current) {
+      const since = performance.now() - combat.lastAttackAt;
+      if (since < 220) {
+        const p = since / 220;
+        swing.current.visible = true;
+        swing.current.scale.setScalar(0.4 + p * 2.8);
+        (swing.current.material as MeshBasicMaterial).opacity = 0.5 * (1 - p);
+      } else {
+        swing.current.visible = false;
+      }
+    }
+
     // Proximity → nearest interactable within radius.
     let best: InteractPoint | null = null;
     let bestD = PROX;
@@ -115,6 +130,14 @@ export default function Player() {
         <circleGeometry args={[0.85, 20]} />
         <meshBasicMaterial color="#000000" transparent opacity={0.28} />
       </mesh>
+
+      {/* attack swing shockwave (combat only) */}
+      {FEATURES.combat && (
+        <mesh ref={swing} rotation-x={-Math.PI / 2} position={[0, 0.1, 0]} visible={false}>
+          <ringGeometry args={[0.7, 1, 28]} />
+          <meshBasicMaterial color="#e8c66a" transparent opacity={0.5} toneMapped={false} />
+        </mesh>
+      )}
 
       <group ref={body}>
         {/* cloak / body */}

@@ -1,11 +1,16 @@
 import { PROJECTS, TOTAL_RELICS } from "../data/projects";
 import { questHint } from "../data/quests";
-import { useGameStore } from "../store/useGameStore";
+import { FEATURES } from "../data/config";
+import { ARENA_WAVES, useGameStore } from "../store/useGameStore";
 import { RelicIcon } from "./icons";
 
-/** Relic tracker + main-quest hint (F7). Top-left, non-blocking. */
+/** Relic tracker + main-quest hint (F7) + health/arena (combat). Top-left. */
 export default function HUD() {
   const found = useGameStore((s) => s.foundRelics);
+  const health = useGameStore((s) => s.health);
+  const maxHealth = useGameStore((s) => s.maxHealth);
+  const arenaActive = useGameStore((s) => s.arenaActive);
+  const arenaWave = useGameStore((s) => s.arenaWave);
   const n = found.size;
 
   return (
@@ -28,9 +33,36 @@ export default function HUD() {
           ))}
         </div>
       </div>
+      {FEATURES.combat && (
+        <div className="panel pointer-events-auto flex items-center gap-1.5 rounded-lg px-3 py-2">
+          {Array.from({ length: maxHealth }, (_, i) => (
+            <Heart key={i} full={i < health} />
+          ))}
+          {arenaActive && (
+            <span className="ml-1 font-mono text-xs font-semibold text-realm-ember">
+              Arena {arenaWave}/{ARENA_WAVES}
+            </span>
+          )}
+        </div>
+      )}
+
       <div className="panel max-w-[260px] rounded-lg px-3 py-1.5 text-xs text-realm-muted">
         {questHint(n)}
       </div>
     </div>
+  );
+}
+
+function Heart({ full }: { full: boolean }) {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" aria-hidden>
+      <path
+        d="M12 21s-7-4.6-9.5-9C1 9 2.5 5.5 6 5.5c2 0 3.2 1.2 4 2.3.8-1.1 2-2.3 4-2.3 3.5 0 5 3.5 3.5 6.5C19 16.4 12 21 12 21Z"
+        fill={full ? "#ff5470" : "transparent"}
+        stroke={full ? "#ff5470" : "#4a3550"}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

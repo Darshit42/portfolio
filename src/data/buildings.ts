@@ -37,6 +37,8 @@ export interface Building {
   half: [number, number];
   /** Theming accent; falls back to the project accent. */
   accent: string;
+  /** If false, the player can walk through it (e.g., the open Arena ring). */
+  solid?: boolean;
   interior?: boolean; // P1
 }
 
@@ -109,6 +111,7 @@ export const BUILDINGS: Building[] = [
     approach: [19, 9],
     half: [6, 6],
     accent: "#ff5470",
+    solid: false, // open ring — the player fights inside it
   },
   {
     id: "null-pointer-tavern",
