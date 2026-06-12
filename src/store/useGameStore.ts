@@ -27,7 +27,7 @@ export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel"
 /** Modes in which player input should be frozen (an overlay is up). */
 export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "title", "recruiter"];
 
-export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door";
+export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door" | "secret";
 
 export interface Interactable {
   kind: InteractableKind;
@@ -177,6 +177,10 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       case "door":
         if (n.target) get().requestTravel(n.target);
+        break;
+      case "secret":
+        // The label carries the easter-egg notice text.
+        get().notify(n.label);
         break;
     }
   },

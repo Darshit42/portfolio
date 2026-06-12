@@ -4,6 +4,7 @@ import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { BUILDINGS } from "../data/buildings";
 import { NPCS } from "../data/npcs";
 import { DOORS } from "../data/interiors";
+import { SECRETS } from "../data/quests";
 import { FEATURES } from "../data/config";
 import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameStore";
 import { playerState } from "./playerState";
@@ -65,7 +66,12 @@ export default function Player() {
         }))
       : [];
 
-    return [...fromBuildings, ...fromNpcs, ...fromDoors];
+    const fromSecrets: InteractPoint[] = SECRETS.map((s) => ({
+      point: s.position,
+      data: { kind: "secret", id: s.id, label: s.notice, prompt: s.prompt } as Interactable,
+    }));
+
+    return [...fromBuildings, ...fromNpcs, ...fromDoors, ...fromSecrets];
   }, []);
 
   useFrame((_, delta) => {

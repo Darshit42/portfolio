@@ -30,3 +30,20 @@ export function questHint(found: number): string {
   const left = TOTAL_RELICS - found;
   return `${found}/${TOTAL_RELICS} relics gathered · ${left} to go.`;
 }
+
+/** Hidden delights (F25). Interacting shows the notice — nothing more. */
+export interface Secret {
+  id: string;
+  position: [number, number]; // [x, z]
+  prompt: string;
+  notice: string;
+}
+
+export const SECRETS: Secret[] = [
+  {
+    id: "infinite-sidequests",
+    position: [-42, -38], // deep in the north-west woods
+    prompt: "Inspect the odd stone",
+    notice: "Side quests completed: ∞",
+  },
+];

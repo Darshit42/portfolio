@@ -9,6 +9,7 @@ import Player from "./Player";
 import Npcs from "./Npcs";
 import Enemies from "./Enemies";
 import Interior from "./Interior";
+import Secrets from "./Secrets";
 import Particles from "./Particles";
 import { isTouchDevice } from "./webgl";
 import { FEATURES } from "../data/config";
@@ -58,6 +59,7 @@ export default function World() {
         {FEATURES.npcs && <Npcs />}
         {FEATURES.combat && <Enemies />}
         {FEATURES.interiors && <Interior />}
+        <Secrets />
         <Player />
         {FEATURES.particles && !touch && <Particles />}
       </Suspense>
