@@ -7,6 +7,25 @@
 export const WORLD_NAME = "Devhalla";
 export const WORLD_TAGLINE = "A hall where the legends are the projects.";
 
+/**
+ * The single world palette — a cozy medieval town at night, lit almost
+ * entirely by warm sources against deep blue-charcoal darkness. Every world
+ * material derives from these (see game/materials.ts); relic accents stay
+ * per-project in projects.ts.
+ */
+export const PALETTE = {
+  nightSky: "#0b0e1a",
+  ground: "#1a1812",
+  stone: "#3a3530",
+  woodDark: "#4a3526",
+  woodLight: "#6b4a2f",
+  roof: "#2e2218",
+  warmLight: "#ffaa44",
+  ember: "#ff6622",
+  foliage: "#1d3320",
+  path: "#2a2620",
+} as const;
+
 export interface Owner {
   name: string;
   role: string;
@@ -42,6 +61,7 @@ export const FEATURES = {
   liveAgentWs: false, // P2 (F24) — real agent feed over WebSocket
   localSave: true, //  P2 (F22)
   particles: true, //  P2 (F23) — cheap glow/sparks, always gated by reduced-motion
+  postfx: true, //     Bloom + vignette; auto-disabled on touch devices for perf
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;

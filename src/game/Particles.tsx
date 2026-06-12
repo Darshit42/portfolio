@@ -15,15 +15,15 @@ export default function Particles() {
 
   return (
     <group>
-      {/* ambient motes across the world */}
+      {/* ambient motes — cool night air, kept dim against the warm town */}
       <Sparkles
         count={70}
         scale={[92, 14, 86]}
         position={[0, 7, 0]}
-        size={2.2}
+        size={2.0}
         speed={0.22}
-        color="#9fd8ff"
-        opacity={0.35}
+        color="#7d9cc8"
+        opacity={0.28}
         noise={1.4}
       />
       {/* forge embers */}
@@ -34,7 +34,7 @@ export default function Particles() {
           position={[forge.position[0], 5, forge.position[1]]}
           size={3.6}
           speed={0.5}
-          color="#ff8a4c"
+          color="#ff6622"
           opacity={0.75}
         />
       )}

@@ -46,14 +46,20 @@ export default function Minimap() {
       <svg
         width={SIZE}
         height={SIZE}
-        className="panel rounded-xl"
+        className="rounded-xl border border-[#4a3526] shadow-panel"
+        style={{ background: "rgba(11,14,26,0.92)" }}
         role="img"
         aria-label="Map of the realm"
       >
-        {/* plaza ref ring */}
+        {/* plaza ref ring — the town hearth */}
         {(() => {
           const [cx, cy] = toMap(0, 2);
-          return <circle cx={cx} cy={cy} r={9} fill="none" stroke="#3a4763" strokeWidth={1} />;
+          return (
+            <g>
+              <circle cx={cx} cy={cy} r={9} fill="none" stroke="#6b4a2f" strokeWidth={1} />
+              <circle cx={cx} cy={cy} r={2} fill="#ffaa44" opacity={0.9} />
+            </g>
+          );
         })()}
 
         {BUILDINGS.map((b) => {
@@ -66,8 +72,8 @@ export default function Minimap() {
                 cx={x}
                 cy={y}
                 r={b.kind === "gate" ? 3 : 4}
-                fill={claimed ? b.accent : `${b.accent}55`}
-                stroke={b.accent}
+                fill={claimed ? b.accent : `${b.accent}44`}
+                stroke={claimed ? b.accent : "#6b4a2f"}
                 strokeWidth={1.2}
               />
             </g>
@@ -76,7 +82,7 @@ export default function Minimap() {
 
         {/* player marker (live) */}
         <g ref={marker}>
-          <path d="M0,-5 L3.5,4 L0,1.5 L-3.5,4 Z" fill="#e8c66a" stroke="#0b0e14" strokeWidth={0.8} />
+          <path d="M0,-5 L3.5,4 L0,1.5 L-3.5,4 Z" fill="#ffaa44" stroke="#0b0e1a" strokeWidth={0.8} />
         </g>
       </svg>
     </div>

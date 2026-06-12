@@ -3,42 +3,54 @@ import { Suspense } from "react";
 import FollowCamera from "./Camera";
 import Ground from "./Ground";
 import Decor from "./Decor";
+import Sky, { MOON_DIR } from "./Sky";
 import Buildings from "./Buildings";
 import PlazaTotem from "./PlazaTotem";
+import Torches from "./Torches";
 import Player from "./Player";
 import Npcs from "./Npcs";
 import Enemies from "./Enemies";
 import Interior from "./Interior";
 import Secrets from "./Secrets";
 import Particles from "./Particles";
+import PostFX from "./PostFX";
 import { isTouchDevice } from "./webgl";
-import { FEATURES } from "../data/config";
+import { FEATURES, PALETTE } from "../data/config";
 
 /**
- * The R3F scene. Shadows + higher DPR on desktop; trimmed on touch devices to
- * hold the mobile frame-rate budget (PRD §5). The scene graph is kept shallow
- * and repeated geometry is instanced (see Decor).
+ * The R3F scene — a torchlit town at night. Lighting model (PRD-art §1):
+ * exponential fog into the night sky, a whisper of cool ambient, one dim
+ * "moonlight" directional (the only shadow caster, PCF-soft), and warm point
+ * lights as the real illumination (Torches/fountain/forge). Post bloom +
+ * vignette on desktop only. Shadows and AA are trimmed on touch devices to
+ * hold the mobile budget; repeated geometry is instanced.
  */
 export default function World() {
   const touch = isTouchDevice();
+  const postfx = FEATURES.postfx && !touch;
 
   return (
     <Canvas
-      shadows={!touch}
+      shadows={touch ? false : "soft"}
       dpr={touch ? [1, 1.5] : [1, 2]}
-      camera={{ position: [15, 23, 18], fov: 42, near: 0.5, far: 220 }}
+      camera={{ position: [15, 23, 18], fov: 42, near: 0.5, far: 260 }}
       gl={{ antialias: !touch, powerPreference: "high-performance" }}
+      onCreated={({ gl }) => {
+        // Moody but not murky — silhouettes must stay readable (§8).
+        gl.toneMappingExposure = 1.18;
+      }}
       frameloop="always"
     >
-      <color attach="background" args={["#0a0c12"]} />
-      <fog attach="fog" args={["#0a0c12", 46, 96]} />
+      <color attach="background" args={[PALETTE.nightSky]} />
+      <fogExp2 attach="fog" args={[PALETTE.nightSky, 0.016]} />
 
-      <hemisphereLight args={["#3a4a6a", "#0b0d13", 0.55]} />
-      <ambientLight intensity={0.22} />
+      {/* very dim cool base so unlit faces never go fully black */}
+      <ambientLight color="#2a3045" intensity={0.4} />
+      {/* moonlight — the only shadow caster; matches the moon in Sky */}
       <directionalLight
-        position={[24, 34, 12]}
-        intensity={1.15}
-        color="#fff1d6"
+        position={MOON_DIR}
+        color="#4a5580"
+        intensity={0.32}
         castShadow={!touch}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -47,14 +59,16 @@ export default function World() {
         shadow-camera-top={64}
         shadow-camera-bottom={-64}
         shadow-camera-near={1}
-        shadow-camera-far={120}
+        shadow-camera-far={160}
         shadow-bias={-0.0004}
       />
 
       <Suspense fallback={null}>
+        <Sky />
         <Ground />
         <Decor />
         <Buildings />
+        <Torches />
         <PlazaTotem />
         {FEATURES.npcs && <Npcs />}
         {FEATURES.combat && <Enemies />}
@@ -65,6 +79,7 @@ export default function World() {
       </Suspense>
 
       <FollowCamera />
+      {postfx && <PostFX />}
     </Canvas>
   );
 }

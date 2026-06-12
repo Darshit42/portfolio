@@ -3,12 +3,15 @@ import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import type { Group, Mesh } from "three";
 import { useGameStore } from "../store/useGameStore";
+import { MAT } from "./materials";
+import { useNear } from "./useNear";
 
 /**
- * A floating relic above a pedestal at a building's entrance. Pulses to draw the
- * eye; brightens when the player is near; settles into a "claimed" halo once
- * inspected. Visuals only — proximity/interaction is resolved centrally in
- * <Player>; this just reflects store state.
+ * A relic shrine (PRD-art §7): stone pedestal, a floating spinning gem, a soft
+ * emissive ring on the ground, and an accent point light that only exists
+ * while the player is nearby (so the global light budget holds — at most a
+ * couple are ever active). Collected relics dim to a faint glow. The name
+ * label fades in within ~13 units (§8).
  */
 export default function RelicMonument({
   position,
@@ -24,6 +27,7 @@ export default function RelicMonument({
   const found = useGameStore((s) => s.foundRelics.has(projectId));
   const near = useGameStore((s) => s.nearby?.projectId === projectId);
   const reduced = useGameStore((s) => s.reducedMotion);
+  const nearLabel = useNear(position[0], position[1], 13);
 
   const gem = useRef<Mesh>(null);
   const halo = useRef<Group>(null);
@@ -40,18 +44,30 @@ export default function RelicMonument({
     if (halo.current && !reduced) halo.current.rotation.z = t * 0.5;
   });
 
-  const emissive = found ? 1 : near ? 2.2 : 1.5;
+  // Collected relics settle to a faint glow; live ones burn bright.
+  const emissive = found ? 0.45 : near ? 2.2 : 1.5;
 
   return (
     <group position={[position[0], 0, position[1]]}>
       {/* pedestal */}
-      <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+      <mesh position={[0, 0.4, 0]} castShadow receiveShadow material={MAT.stone}>
         <cylinderGeometry args={[0.9, 1.1, 0.8, 12]} />
-        <meshStandardMaterial color="#1c2230" />
       </mesh>
       <mesh position={[0, 0.85, 0]}>
         <cylinderGeometry args={[0.7, 0.9, 0.15, 12]} />
-        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={found ? 0.6 : 0.3} />
+        <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={found ? 0.25 : 0.4} />
+      </mesh>
+
+      {/* soft accent ring on the ground */}
+      <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0]}>
+        <ringGeometry args={[1.35, 1.7, 28]} />
+        <meshStandardMaterial
+          color={accent}
+          emissive={accent}
+          emissiveIntensity={found ? 0.18 : 0.5}
+          transparent
+          opacity={found ? 0.45 : 0.8}
+        />
       </mesh>
 
       {/* the relic */}
@@ -71,18 +87,34 @@ export default function RelicMonument({
         <group ref={halo} position={[0, 2.6, 0]} rotation-x={Math.PI / 2}>
           <mesh>
             <torusGeometry args={[1.15, 0.05, 8, 32]} />
-            <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={1} toneMapped={false} />
+            <meshStandardMaterial color={accent} emissive={accent} emissiveIntensity={0.6} toneMapped={false} />
           </mesh>
         </group>
       )}
 
-      {/* name label — non-interactive, scales with distance */}
+      {/* proximity-gated accent light — at most a couple active world-wide */}
+      {nearLabel && (
+        <pointLight
+          position={[0, 2.4, 0]}
+          color={accent}
+          intensity={found ? 0.7 : 1.5}
+          distance={6}
+          decay={2}
+        />
+      )}
+
+      {/* name label — fades in within ~13 units */}
       <Html
         position={[0, 4.1, 0]}
         center
         distanceFactor={26}
         pointerEvents="none"
-        style={{ pointerEvents: "none", userSelect: "none" }}
+        style={{
+          pointerEvents: "none",
+          userSelect: "none",
+          opacity: nearLabel ? 1 : 0,
+          transition: "opacity 0.3s",
+        }}
         zIndexRange={[10, 0]}
       >
         <div
@@ -90,8 +122,7 @@ export default function RelicMonument({
           style={{
             borderColor: near ? accent : "rgba(255,255,255,0.12)",
             color: found ? "#e6ebf5" : near ? accent : "#9aa6bf",
-            background: "rgba(10,12,18,0.7)",
-            opacity: near ? 1 : 0.85,
+            background: "rgba(11,14,26,0.75)",
           }}
         >
           {found ? "✓ " : ""}
