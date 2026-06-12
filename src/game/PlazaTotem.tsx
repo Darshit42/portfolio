@@ -24,7 +24,8 @@ export default function PlazaTotem() {
     const t = state.clock.elapsedTime;
     if (ring.current) ring.current.rotation.y = t * 0.3;
     if (light.current) {
-      light.current.intensity = 3 * (1 + (Math.sin(t * 6.1) * 0.6 + Math.sin(t * 15.7) * 0.4) * 0.1);
+      // physical units: broad hearth glow needs a big candela value
+      light.current.intensity = 60 * (1 + (Math.sin(t * 6.1) * 0.6 + Math.sin(t * 15.7) * 0.4) * 0.1);
     }
   });
 
@@ -48,17 +49,17 @@ export default function PlazaTotem() {
       </mesh>
 
       {/* central monument */}
-      <mesh position={[0, 2.2, 0]} castShadow material={MAT.stone}>
-        <cylinderGeometry args={[0.55, 1.0, 3.4, 6]} />
+      <mesh position={[0, 2.0, 0]} castShadow material={MAT.stone}>
+        <cylinderGeometry args={[0.55, 1.0, 3.0, 6]} />
       </mesh>
-      {/* the glowing heart — pushes past the bloom threshold */}
-      <mesh position={[0, 3.0, 0]} material={MAT.warmCore}>
-        <cylinderGeometry args={[0.3, 0.3, 1.6, 6]} />
+      {/* the glowing heart — exposed above the column, past the bloom threshold */}
+      <mesh position={[0, 4.05, 0]} material={MAT.warmCore}>
+        <cylinderGeometry args={[0.34, 0.3, 1.1, 6]} />
       </mesh>
-      <mesh position={[0, 4.45, 0]} castShadow material={MAT.stoneDark}>
-        <coneGeometry args={[0.7, 0.9, 6]} />
+      <mesh position={[0, 4.95, 0]} castShadow material={MAT.stoneDark}>
+        <coneGeometry args={[0.62, 0.8, 6]} />
       </mesh>
-      <mesh position={[0, 5.1, 0]} material={MAT.warmCore}>
+      <mesh position={[0, 5.55, 0]} material={MAT.warmCore}>
         <octahedronGeometry args={[0.32]} />
       </mesh>
 
@@ -67,7 +68,7 @@ export default function PlazaTotem() {
         ref={light}
         position={[0, 3.4, 0]}
         color={PALETTE.warmLight}
-        intensity={3}
+        intensity={60}
         distance={24}
         decay={2}
       />

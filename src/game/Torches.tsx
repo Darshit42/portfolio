@@ -53,6 +53,12 @@ function buildLayout(): { torches: P2[]; lights: P2[] } {
     }
   }
 
+  // Spawn welcome pair — the spawn zone sits on the tavern's far side from
+  // the camera (its door pool is self-occluded), so light the path start.
+  torches.push({ x: -2.6, z: 21.5 });
+  torches.push({ x: 2.6, z: 21.5 });
+  lights.push({ x: 0, z: 21.5 });
+
   // Plaza ring: 6 torches, lit by 2 shared lights.
   for (let i = 0; i < 6; i++) {
     const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
@@ -86,6 +92,10 @@ export default function Torches() {
   const phases = useMemo(() => lights.map((_, i) => i * 1.73 + 0.61), [lights]);
   const lightRefs = useRef<(PointLight | null)[]>([]);
 
+  // three r155+ physical units: decay-2 lights attenuate as 1/d², so a
+  // readable torch pool needs a large candela value, not the legacy ~2.5.
+  const TORCH_INTENSITY = 35;
+
   // Flicker: jitter each light ±15% with a per-torch phase. Static when
   // reduced-motion is on.
   useFrame((state) => {
@@ -94,7 +104,9 @@ export default function Torches() {
     for (let i = 0; i < lights.length; i++) {
       const l = lightRefs.current[i];
       if (!l) continue;
-      l.intensity = 2.5 * (1 + (Math.sin(t * 9 + phases[i]) * 0.6 + Math.sin(t * 23 + phases[i] * 2) * 0.4) * 0.15);
+      l.intensity =
+        TORCH_INTENSITY *
+        (1 + (Math.sin(t * 9 + phases[i]) * 0.6 + Math.sin(t * 23 + phases[i] * 2) * 0.4) * 0.15);
     }
   });
 
@@ -127,7 +139,7 @@ export default function Torches() {
           }}
           position={[l.x, 2.8, l.z]}
           color="#ff9944"
-          intensity={2.5}
+          intensity={35}
           distance={10}
           decay={2}
         />

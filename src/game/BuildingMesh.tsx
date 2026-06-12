@@ -180,7 +180,8 @@ function Forge({ accent }: { accent: string }) {
   useFrame((state) => {
     if (reduced) return;
     const t = state.clock.elapsedTime;
-    if (light.current) light.current.intensity = 3 * (1 + (Math.sin(t * 9) * 0.6 + Math.sin(t * 23) * 0.4) * 0.15);
+    // physical units — the forge is the hottest light in town
+    if (light.current) light.current.intensity = 50 * (1 + (Math.sin(t * 9) * 0.6 + Math.sin(t * 23) * 0.4) * 0.15);
     maw.emissiveIntensity = 1.6 + Math.sin(t * 9) * 0.45;
   });
 
@@ -219,7 +220,7 @@ function Forge({ accent }: { accent: string }) {
       <Sparks origin={[0.4, 1.1, 3.2]} />
 
       {/* the budgeted strong interior glow */}
-      <pointLight ref={light} position={[0, 2.2, 3.2]} color="#ff5522" intensity={3} distance={16} decay={2} />
+      <pointLight ref={light} position={[0, 2.2, 3.2]} color="#ff5522" intensity={50} distance={16} decay={2} />
 
       {/* side windows + sign */}
       <Window pos={[-6.06, 2.6, -1.5]} rotY={Math.PI / 2} />
@@ -649,7 +650,7 @@ function Gate({ accent }: { accent: string }) {
       <mesh position={[0, 4, 0]} material={portalMat}>
         <planeGeometry args={[6, 7.4]} />
       </mesh>
-      {open && <pointLight position={[0, 4, 2]} color={accent} intensity={2} distance={22} decay={2} />}
+      {open && <pointLight position={[0, 4, 2]} color={accent} intensity={30} distance={22} decay={2} />}
     </group>
   );
 }

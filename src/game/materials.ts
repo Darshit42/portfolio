@@ -13,19 +13,23 @@ import { PALETTE } from "../data/config";
  * per frame). Anything that ANIMATES its material (forge maw, gate portal)
  * must own a unique instance instead — mutating these would change everything.
  */
+// NOTE on tones: material colors live in sRGB but light math runs in linear,
+// which crushes dark albedos (~#2e2218 → 0.02 linear). The world materials
+// therefore run ~1.5× lighter than the raw palette hexes — same hue, same
+// night mood, but silhouettes survive the sRGB→linear conversion.
 export const MAT = {
-  stone: new MeshStandardMaterial({ color: PALETTE.stone }),
-  stoneDark: new MeshStandardMaterial({ color: "#2a2724" }),
-  woodDark: new MeshStandardMaterial({ color: PALETTE.woodDark }),
-  woodLight: new MeshStandardMaterial({ color: PALETTE.woodLight }),
-  roof: new MeshStandardMaterial({ color: PALETTE.roof }),
-  path: new MeshStandardMaterial({ color: PALETTE.path }),
-  trunk: new MeshStandardMaterial({ color: "#3a2a1c" }),
-  foliage: new MeshStandardMaterial({ color: PALETTE.foliage, flatShading: true }),
+  stone: new MeshStandardMaterial({ color: "#4a4540" }),
+  stoneDark: new MeshStandardMaterial({ color: "#3a3631" }),
+  woodDark: new MeshStandardMaterial({ color: "#5a432e" }),
+  woodLight: new MeshStandardMaterial({ color: "#7d5a3c" }),
+  roof: new MeshStandardMaterial({ color: "#5a4530" }),
+  path: new MeshStandardMaterial({ color: "#38322a" }),
+  trunk: new MeshStandardMaterial({ color: "#4a3624" }),
+  foliage: new MeshStandardMaterial({ color: "#27432c", flatShading: true }),
   /** White base for instanced meshes that carry per-instance colors (the
    *  instance color multiplies material.color — a tinted base would double-darken). */
   instWhite: new MeshStandardMaterial({ color: "#ffffff", flatShading: true }),
-  rock: new MeshStandardMaterial({ color: "#33312e", flatShading: true }),
+  rock: new MeshStandardMaterial({ color: "#45423e", flatShading: true }),
   metal: new MeshStandardMaterial({ color: "#15171d", metalness: 0.6, roughness: 0.4 }),
   paper: new MeshStandardMaterial({ color: "#cfc9b8" }),
 
@@ -75,8 +79,8 @@ export function accentMat(hex: string, intensity = 0.5, doubleSided = false): Me
       emissive: hex,
       emissiveIntensity: intensity,
       toneMapped: intensity < 1, // strong emissives push past the bloom threshold
-      side: doubleSided ? DoubleSide : undefined,
     });
+    if (doubleSided) m.side = DoubleSide;
     accentCache.set(key, m);
   }
   return m;
@@ -105,16 +109,16 @@ export function makeGroundTexture(): CanvasTexture {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 
-  g.fillStyle = PALETTE.ground;
+  g.fillStyle = "#262218";
   g.fillRect(0, 0, size, size);
 
   for (let y = 0; y < tiles; y++) {
     for (let x = 0; x < tiles; x++) {
-      // per-tile tone variance around the base ground colour
-      const v = (rand() - 0.5) * 14;
-      const r = Math.max(0, 0x1a + v);
-      const gg = Math.max(0, 0x18 + v);
-      const b = Math.max(0, 0x12 + v * 0.8);
+      // per-tile tone variance around the (linear-survivable) ground colour
+      const v = (rand() - 0.5) * 16;
+      const r = Math.max(0, 0x26 + v);
+      const gg = Math.max(0, 0x22 + v);
+      const b = Math.max(0, 0x18 + v * 0.8);
       g.fillStyle = `rgb(${r | 0},${gg | 0},${b | 0})`;
       g.fillRect(x * tile + 1, y * tile + 1, tile - 2, tile - 2);
 
@@ -127,7 +131,7 @@ export function makeGroundTexture(): CanvasTexture {
   }
 
   // grout lines
-  g.strokeStyle = "#121008";
+  g.strokeStyle = "#191510";
   g.lineWidth = 2;
   for (let i = 0; i <= tiles; i++) {
     g.beginPath();

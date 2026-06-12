@@ -106,11 +106,11 @@ export default function Ground() {
       {/* central plaza — a touch lighter than the paths, with a rim */}
       <mesh rotation-x={-Math.PI / 2} position={[PLAZA_CENTER[0], 0.01, PLAZA_CENTER[1]]} receiveShadow>
         <circleGeometry args={[12, 48]} />
-        <meshStandardMaterial color="#34302a" />
+        <meshStandardMaterial color="#423c33" />
       </mesh>
       <mesh rotation-x={-Math.PI / 2} position={[PLAZA_CENTER[0], 0.02, PLAZA_CENTER[1]]} receiveShadow>
         <ringGeometry args={[11.3, 12, 48]} />
-        <meshStandardMaterial color="#46403a" />
+        <meshStandardMaterial color="#564e44" />
       </mesh>
 
       {/* scattered detail — one instanced draw call per kind */}

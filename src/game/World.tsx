@@ -37,20 +37,25 @@ export default function World() {
       gl={{ antialias: !touch, powerPreference: "high-performance" }}
       onCreated={({ gl }) => {
         // Moody but not murky — silhouettes must stay readable (§8).
-        gl.toneMappingExposure = 1.18;
+        // ACES filmic rolls off the warm pools, so exposure can run high.
+        gl.toneMappingExposure = 1.75;
       }}
       frameloop="always"
     >
       <color attach="background" args={[PALETTE.nightSky]} />
       <fogExp2 attach="fog" args={[PALETTE.nightSky, 0.016]} />
 
-      {/* very dim cool base so unlit faces never go fully black */}
-      <ambientLight color="#2a3045" intensity={0.4} />
-      {/* moonlight — the only shadow caster; matches the moon in Sky */}
+      {/* dim cool base so unlit faces never go fully black.
+          NOTE: three r155+ physical light units — point lights need big
+          intensities (decay-2 attenuates as 1/d²); these two are unitless. */}
+      {/* Light colors stay MID-sRGB: dark hexes crush to ~0.03 in linear and
+          multiply against dark albedos to invisible. Hue carries the mood. */}
+      <ambientLight color="#3a4258" intensity={1.0} />
+      {/* moonlight — the only shadow caster; matches the moon in Sky. */}
       <directionalLight
         position={MOON_DIR}
-        color="#4a5580"
-        intensity={0.32}
+        color="#8a9cc8"
+        intensity={1.5}
         castShadow={!touch}
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -62,6 +67,10 @@ export default function World() {
         shadow-camera-far={160}
         shadow-bias={-0.0004}
       />
+      {/* cool fill from the camera side (SE) — the moon backlights the town,
+          so without this every camera-facing wall sits in its own shadow.
+          No shadow casting; just lifts silhouettes to readable. */}
+      <directionalLight position={[40, 30, 48]} color="#6a7a9e" intensity={0.8} />
 
       <Suspense fallback={null}>
         <Sky />

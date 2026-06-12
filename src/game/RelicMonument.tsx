@@ -97,7 +97,7 @@ export default function RelicMonument({
         <pointLight
           position={[0, 2.4, 0]}
           color={accent}
-          intensity={found ? 0.7 : 1.5}
+          intensity={found ? 7 : 14}
           distance={6}
           decay={2}
         />

@@ -102,7 +102,8 @@ function TavernProps() {
   useFrame((state) => {
     if (reduced || !fireLight.current) return;
     const t = state.clock.elapsedTime;
-    fireLight.current.intensity = 1.5 + Math.sin(t * 7.3) * 0.25 + Math.sin(t * 19) * 0.12;
+    // physical light units (three r155+): hearth glow needs candela-scale values
+    fireLight.current.intensity = 18 + Math.sin(t * 7.3) * 3 + Math.sin(t * 19) * 1.4;
   });
 
   const bottleColors = ["#b06cff", "#39d98a", "#e8c66a", "#ff5470", "#6ad0ff"];
@@ -191,7 +192,7 @@ function TavernProps() {
         <boxGeometry args={[1.3, 1.1, 0.2]} />
         <meshStandardMaterial color="#ff9a4c" emissive="#ff9a4c" emissiveIntensity={1.3} toneMapped={false} />
       </mesh>
-      <pointLight ref={fireLight} position={[163.5, 1.8, 56.6]} color="#ff9a4c" intensity={1.5} distance={18} decay={2} />
+      <pointLight ref={fireLight} position={[163.5, 1.8, 56.6]} color="#ff9a4c" intensity={18} distance={18} decay={2} />
 
       {/* rug */}
       <mesh rotation-x={-Math.PI / 2} position={[158.8, 0.02, 61]}>
@@ -210,7 +211,8 @@ function ForgeProps() {
   useFrame((state) => {
     if (reduced) return;
     const t = state.clock.elapsedTime;
-    if (forgeLight.current) forgeLight.current.intensity = 2.0 + Math.sin(t * 9) * 0.4 + Math.sin(t * 23) * 0.2;
+    // physical light units (three r155+)
+    if (forgeLight.current) forgeLight.current.intensity = 30 + Math.sin(t * 9) * 6 + Math.sin(t * 23) * 3;
     if (maw.current) {
       (maw.current.material as unknown as MeshStandardMaterial).emissiveIntensity = 1.5 + Math.sin(t * 9) * 0.45;
     }
@@ -231,7 +233,7 @@ function ForgeProps() {
         <cylinderGeometry args={[0.5, 0.6, 2.4, 10]} />
         <meshStandardMaterial color="#1c2230" />
       </mesh>
-      <pointLight ref={forgeLight} position={[160, 1.9, -62.4]} color="#ff7a3c" intensity={2} distance={20} decay={2} />
+      <pointLight ref={forgeLight} position={[160, 1.9, -62.4]} color="#ff7a3c" intensity={30} distance={20} decay={2} />
 
       {/* anvil (collider at [159, -59.5] half [0.8, 0.5]) */}
       <mesh position={[159, 0.3, -59.5]}>

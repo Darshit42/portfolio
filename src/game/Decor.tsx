@@ -3,7 +3,6 @@ import { useFrame } from "@react-three/fiber";
 import { Color, type Mesh } from "three";
 import { Instances, Instance } from "@react-three/drei";
 import { BUILDINGS, PLAZA_CENTER, WORLD_BOUNDS } from "../data/buildings";
-import { PALETTE } from "../data/config";
 import { useGameStore } from "../store/useGameStore";
 import { isTouchDevice } from "./webgl";
 import { MAT } from "./materials";
@@ -32,8 +31,10 @@ interface Item {
   rot: number;
 }
 
-const FOLIAGE = new Color(PALETTE.foliage);
-const FOLIAGE_FAR = new Color("#0a1410");
+// Lifted from the raw palette hex so trees survive the sRGB→linear crush;
+// the far color stays deep so the ring still melts into the fog.
+const FOLIAGE = new Color("#2c4a32");
+const FOLIAGE_FAR = new Color("#101e16");
 
 /** Distance from a point to the plaza→approach path segment of any building. */
 function nearAnyPath(x: number, z: number, within: number): boolean {

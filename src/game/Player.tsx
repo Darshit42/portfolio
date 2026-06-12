@@ -153,6 +153,10 @@ export default function Player() {
         </mesh>
       )}
 
+      {/* hero fill — a faint warm lantern-glow on the camera side so the
+          player reads everywhere, even between torch pools (§8 readability) */}
+      <pointLight position={[1.6, 3.2, 1.8]} color="#b89878" intensity={12} distance={8} decay={2} />
+
       <group ref={body}>
         {/* cloak / body */}
         <mesh position={[0, 1.0, 0]} castShadow>
