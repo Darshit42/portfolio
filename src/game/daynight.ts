@@ -46,13 +46,15 @@ const c = (hex: string) => new Color(hex);
 // Keyframes ascending by phase; the gap from the last back to the first wraps
 // across midnight. Tuned so night matches the established torchlit look.
 const KEYS: KF[] = [
-  { p: 0.0, sky: c("#0b0e1a"), fog: c("#0b0e1a"), fogD: 0.016, ambC: c("#3a4258"), ambI: 1.0, sunC: c("#8a9cc8"), sunI: 1.5, fillI: 0.8, star: 1.0, exp: 1.75 },
-  { p: 0.2, sky: c("#151830"), fog: c("#141826"), fogD: 0.018, ambC: c("#3e3a52"), ambI: 0.95, sunC: c("#6f7196"), sunI: 1.25, fillI: 0.65, star: 0.85, exp: 1.7 },
+  // night is moody but must stay clearly READABLE — lifted ambient + fill so
+  // the open ground and the player never fall into near-black.
+  { p: 0.0, sky: c("#151a30"), fog: c("#141829"), fogD: 0.013, ambC: c("#525b74"), ambI: 2.3, sunC: c("#a2b3df"), sunI: 2.9, fillI: 1.55, star: 1.0, exp: 1.7 },
+  { p: 0.2, sky: c("#191d36"), fog: c("#161b2d"), fogD: 0.014, ambC: c("#4c4c68"), ambI: 2.1, sunC: c("#878bae"), sunI: 2.4, fillI: 1.35, star: 0.85, exp: 1.7 },
   { p: 0.27, sky: c("#b88a5e"), fog: c("#946a4e"), fogD: 0.0095, ambC: c("#7a6860"), ambI: 1.8, sunC: c("#ffbf72"), sunI: 3.0, fillI: 0.6, star: 0.05, exp: 1.4 },
   { p: 0.5, sky: c("#86abdc"), fog: c("#a3bcdc"), fogD: 0.005, ambC: c("#b6c6da"), ambI: 2.9, sunC: c("#fff4dc"), sunI: 4.6, fillI: 1.0, star: 0.0, exp: 1.12 },
   { p: 0.73, sky: c("#88a4d2"), fog: c("#9eb6d6"), fogD: 0.006, ambC: c("#aebfd6"), ambI: 2.6, sunC: c("#ffeccb"), sunI: 4.1, fillI: 0.95, star: 0.0, exp: 1.2 },
   { p: 0.79, sky: c("#c2764a"), fog: c("#9c5c3e"), fogD: 0.011, ambC: c("#7c5a50"), ambI: 1.25, sunC: c("#ff8442"), sunI: 2.2, fillI: 0.5, star: 0.08, exp: 1.42 },
-  { p: 0.85, sky: c("#241f3a"), fog: c("#1c1930"), fogD: 0.016, ambC: c("#423d56"), ambI: 0.95, sunC: c("#7a6a92"), sunI: 1.35, fillI: 0.6, star: 0.7, exp: 1.7 },
+  { p: 0.85, sky: c("#2a2442"), fog: c("#221e38"), fogD: 0.013, ambC: c("#544d6c"), ambI: 2.1, sunC: c("#8d7eaa"), sunI: 2.4, fillI: 1.45, star: 0.7, exp: 1.7 },
 ];
 
 const MOON_DIR: [number, number, number] = [-0.55, 0.72, -0.4];

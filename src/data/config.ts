@@ -74,8 +74,8 @@ export type FeatureFlag = keyof typeof FEATURES;
  */
 export const DAY_NIGHT = {
   enabled: true,
-  periodSeconds: 360, // length of one full in-world day
-  startPhase: 0.86, //  open at ~20:40 — deep, cozy night
+  periodSeconds: 420, // length of one full in-world day
+  startPhase: 0.78, //  open at golden dusk (~18:40) — warm and clearly lit
   useRealTime: false,
 } as const;
 
