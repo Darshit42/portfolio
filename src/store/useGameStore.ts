@@ -67,6 +67,9 @@ export interface GameState {
   webglFailed: boolean;
   hasSeenControls: boolean;
 
+  // ---- day/night ----
+  daySegment: "night" | "dawn" | "day" | "dusk";
+
   // ---- combat (F13–F15, F17) ----
   health: number;
   maxHealth: number;
@@ -102,6 +105,7 @@ export interface GameState {
   setReducedMotion: (v: boolean) => void;
   setWebglFailed: () => void;
   markControlsSeen: () => void;
+  setDaySegment: (s: GameState["daySegment"]) => void;
 
   damagePlayer: (n: number) => void;
   healToFull: () => void;
@@ -131,6 +135,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   reducedMotion: saved.reducedMotion ?? prefersReducedMotion,
   webglFailed: false,
   hasSeenControls: false,
+
+  daySegment: "night",
 
   health: MAX_HEALTH,
   maxHealth: MAX_HEALTH,
@@ -237,6 +243,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   setReducedMotion: (v) => set({ reducedMotion: v }),
   setWebglFailed: () => set({ webglFailed: true, mode: "recruiter" }),
   markControlsSeen: () => set({ hasSeenControls: true }),
+  setDaySegment: (s) => set({ daySegment: s }),
 
   notify: (text) => set((s) => ({ noticeText: text, noticeKey: s.noticeKey + 1 })),
 

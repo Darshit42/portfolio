@@ -17,6 +17,7 @@ import Joystick from "../ui/Joystick";
 import ControlsHint from "../ui/ControlsHint";
 import Minimap from "../ui/Minimap";
 import Toasts from "../ui/Toasts";
+import TimeIndicator from "../ui/TimeIndicator";
 import NoticeToast from "../ui/NoticeToast";
 import DamageVignette from "../ui/DamageVignette";
 import AttackButton from "../ui/AttackButton";
@@ -87,6 +88,7 @@ export default function GameRoot() {
       {FEATURES.minimap && <Minimap />}
       {FEATURES.audio && <AudioManager />}
       {FEATURES.combat && <DamageVignette />}
+      <TimeIndicator />
       <Toasts />
       <NoticeToast />
 

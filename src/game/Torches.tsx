@@ -5,6 +5,7 @@ import { Instances, Instance } from "@react-three/drei";
 import { BUILDINGS, PLAZA_CENTER } from "../data/buildings";
 import { useGameStore } from "../store/useGameStore";
 import { MAT } from "./materials";
+import { daynight } from "./daynight";
 
 /**
  * The town's torch posts — the world's real illumination (PRD-art §2).
@@ -99,14 +100,16 @@ export default function Torches() {
   // Flicker: jitter each light ±15% with a per-torch phase. Static when
   // reduced-motion is on.
   useFrame((state) => {
-    if (reduced) return;
     const t = state.clock.elapsedTime;
+    // fade the warm pools out in daylight (multiplier from the cycle)
+    const warm = daynight.warm;
     for (let i = 0; i < lights.length; i++) {
       const l = lightRefs.current[i];
       if (!l) continue;
-      l.intensity =
-        TORCH_INTENSITY *
-        (1 + (Math.sin(t * 9 + phases[i]) * 0.6 + Math.sin(t * 23 + phases[i] * 2) * 0.4) * 0.15);
+      const flick = reduced
+        ? 1
+        : 1 + (Math.sin(t * 9 + phases[i]) * 0.6 + Math.sin(t * 23 + phases[i] * 2) * 0.4) * 0.15;
+      l.intensity = TORCH_INTENSITY * flick * warm;
     }
   });
 

@@ -66,6 +66,19 @@ export const FEATURES = {
 
 export type FeatureFlag = keyof typeof FEATURES;
 
+/**
+ * Day/night cycle. The realm opens at night (the signature torchlit look) and
+ * then animates through dawn → day → dusk → night on a compressed clock, so a
+ * lingering visitor sees the whole cycle and the mobs shift with it. Set
+ * `useRealTime` to sync the phase to the visitor's local clock instead.
+ */
+export const DAY_NIGHT = {
+  enabled: true,
+  periodSeconds: 360, // length of one full in-world day
+  startPhase: 0.86, //  open at ~20:40 — deep, cozy night
+  useRealTime: false,
+} as const;
+
 /** Quick top-bar links, derived from the owner. */
 export const QUICK_LINKS = {
   github: OWNER.github,

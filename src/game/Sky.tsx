@@ -1,16 +1,16 @@
-import { useMemo } from "react";
-import { PALETTE } from "../data/config";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import type { Group, Mesh, MeshBasicMaterial, PointsMaterial } from "three";
+import { daynight } from "./daynight";
 
 /**
- * Night sky: ~220 static star points + a simple crescent moon, both with fog
- * disabled (they live near the far plane and would otherwise fade to nothing).
- * The moon sits along the moonlight direction (NW) — the side the dimetric
- * camera actually faces. The crescent is the classic two-sphere trick: a
- * sky-coloured sphere overlaps the lit one and carves the shadowed face.
+ * Night sky that follows the cycle: ~220 stars fade out by day, and a single
+ * celestial body position (daynight.sunDir) holds the warm sun by day and the
+ * crescent moon by night, cross-fading at dawn/dusk. All fog-disabled (they
+ * live near the far plane and would otherwise vanish into the fog).
  */
 
-/** Must match the directional "moonlight" position in World.tsx. */
-export const MOON_DIR: [number, number, number] = [-40, 60, -25];
+const R = 150;
 
 function mulberry32(seed: number) {
   return () => {
@@ -23,15 +23,21 @@ function mulberry32(seed: number) {
 }
 
 export default function Sky() {
+  const starMat = useRef<PointsMaterial>(null);
+  const sun = useRef<Group>(null);
+  const sunMat = useRef<MeshBasicMaterial>(null);
+  const sunGlow = useRef<MeshBasicMaterial>(null);
+  const moon = useRef<Group>(null);
+  const moonMat = useRef<MeshBasicMaterial>(null);
+  const moonShade = useRef<Mesh>(null);
+
   const stars = useMemo(() => {
     const rand = mulberry32(777);
     const n = 220;
     const arr = new Float32Array(n * 3);
-    const R = 150;
     for (let i = 0; i < n; i++) {
       const theta = rand() * Math.PI * 2;
-      // bias toward the zenith; keep everything well above the horizon
-      const phi = Math.acos(0.25 + rand() * 0.72);
+      const phi = Math.acos(0.25 + rand() * 0.72); // bias to the zenith
       arr[i * 3] = R * Math.sin(phi) * Math.cos(theta);
       arr[i * 3 + 1] = R * Math.cos(phi) + 10;
       arr[i * 3 + 2] = R * Math.sin(phi) * Math.sin(theta);
@@ -39,12 +45,26 @@ export default function Sky() {
     return arr;
   }, []);
 
-  const moonPos = useMemo<[number, number, number]>(() => {
-    const [x, y, z] = MOON_DIR;
-    const len = Math.hypot(x, y, z);
-    const R = 140;
-    return [(x / len) * R, (y / len) * R, (z / len) * R];
-  }, []);
+  useFrame(() => {
+    if (starMat.current) starMat.current.opacity = daynight.starOpacity * 0.9;
+
+    const d = daynight.sunDir;
+    const px = d[0] * R;
+    const py = Math.max(d[1] * R, -20);
+    const pz = d[2] * R;
+
+    if (sun.current) sun.current.position.set(px, py, pz);
+    if (moon.current) moon.current.position.set(px, py, pz);
+    if (sunMat.current) sunMat.current.opacity = daynight.sunDiscOpacity;
+    if (sunGlow.current) sunGlow.current.opacity = daynight.sunDiscOpacity * 0.4;
+    if (moonMat.current) moonMat.current.opacity = daynight.moonDiscOpacity;
+    if (moonShade.current) {
+      const m = moonShade.current.material as MeshBasicMaterial;
+      // shade tracks the sky color so the crescent carve stays invisible —
+      // simplest is to ride the moon's own fade
+      m.opacity = daynight.moonDiscOpacity;
+    }
+  });
 
   return (
     <group>
@@ -53,6 +73,7 @@ export default function Sky() {
           <bufferAttribute attach="attributes-position" args={[stars, 3]} />
         </bufferGeometry>
         <pointsMaterial
+          ref={starMat}
           size={1.7}
           sizeAttenuation={false}
           color="#cdd6f5"
@@ -63,16 +84,27 @@ export default function Sky() {
         />
       </points>
 
-      <group position={moonPos}>
-        {/* lit disc */}
+      {/* sun */}
+      <group ref={sun}>
         <mesh>
-          <sphereGeometry args={[5.5, 24, 16]} />
-          <meshBasicMaterial color="#dfe8ff" toneMapped={false} fog={false} />
+          <sphereGeometry args={[6, 24, 16]} />
+          <meshBasicMaterial ref={sunMat} color="#ffdf9a" transparent toneMapped={false} fog={false} depthWrite={false} />
         </mesh>
-        {/* sky-coloured occluder carves the crescent */}
-        <mesh position={[2.6, 1.4, 2.2]}>
-          <sphereGeometry args={[5.4, 24, 16]} />
-          <meshBasicMaterial color={PALETTE.nightSky} fog={false} />
+        <mesh>
+          <sphereGeometry args={[10, 24, 16]} />
+          <meshBasicMaterial ref={sunGlow} color="#ffb860" transparent opacity={0.4} toneMapped={false} fog={false} depthWrite={false} />
+        </mesh>
+      </group>
+
+      {/* moon (crescent: lit disc + sky-shaded occluder) */}
+      <group ref={moon}>
+        <mesh>
+          <sphereGeometry args={[5.2, 24, 16]} />
+          <meshBasicMaterial ref={moonMat} color="#dfe8ff" transparent toneMapped={false} fog={false} depthWrite={false} />
+        </mesh>
+        <mesh ref={moonShade} position={[2.5, 1.3, 2.0]}>
+          <sphereGeometry args={[5.1, 24, 16]} />
+          <meshBasicMaterial color="#0b0e1a" transparent fog={false} depthWrite={false} />
         </mesh>
       </group>
     </group>
