@@ -12,6 +12,7 @@ import type { BuildingKind } from "../data/buildings";
 import { PALETTE } from "../data/config";
 import { useGameStore, selectGateOpen } from "../store/useGameStore";
 import { MAT, accentMat } from "./materials";
+import { RBox } from "./RBox";
 
 /**
  * Building pass (PRD-art §5). Every structure is modeled with its FRONT at
@@ -188,13 +189,9 @@ function Forge({ accent }: { accent: string }) {
   return (
     <group>
       {/* closed back volume + open-front side walls */}
-      <mesh position={[0, 2.5, -2.5]} castShadow receiveShadow material={MAT.stoneDark}>
-        <boxGeometry args={[12, 5, 7]} />
-      </mesh>
+      <RBox position={[0, 2.5, -2.5]} castShadow receiveShadow material={MAT.stoneDark} args={[12, 5, 7]} radius={0.3} />
       {[-4.25, 4.25].map((x) => (
-        <mesh key={x} position={[x, 2.5, 3.5]} castShadow material={MAT.stoneDark}>
-          <boxGeometry args={[3.5, 5, 5]} />
-        </mesh>
+        <RBox key={x} position={[x, 2.5, 3.5]} castShadow material={MAT.stoneDark} args={[3.5, 5, 5]} radius={0.25} />
       ))}
       <mesh position={[0, 4.5, 5.4]} castShadow material={MAT.stoneDark}>
         <boxGeometry args={[5, 1.1, 1.0]} />
@@ -285,12 +282,8 @@ function GuildHall({ accent }: { accent: string }) {
   return (
     <group>
       {/* the grandest hall in town */}
-      <mesh position={[0, 0.4, 0]} receiveShadow material={MAT.stoneDark}>
-        <boxGeometry args={[12.6, 0.8, 10.6]} />
-      </mesh>
-      <mesh position={[0, 3.5, 0]} castShadow receiveShadow material={MAT.stone}>
-        <boxGeometry args={[12, 7, 10]} />
-      </mesh>
+      <RBox position={[0, 0.4, 0]} receiveShadow material={MAT.stoneDark} args={[12.6, 0.8, 10.6]} radius={0.16} />
+      <RBox position={[0, 3.5, 0]} castShadow receiveShadow material={MAT.stone} args={[12, 7, 10]} radius={0.32} />
       {/* front pilasters */}
       {[-5.6, 5.6].map((x) => (
         <mesh key={x} position={[x, 3.5, 5.1]} castShadow material={MAT.stoneDark}>
@@ -379,9 +372,7 @@ function Booth({ accent }: { accent: string }) {
   return (
     <group>
       {/* low walls under a tent-like angular canopy */}
-      <mesh position={[0, 1.25, 0]} castShadow receiveShadow material={MAT.woodDark}>
-        <boxGeometry args={[6.2, 2.5, 6.2]} />
-      </mesh>
+      <RBox position={[0, 1.25, 0]} castShadow receiveShadow material={MAT.woodDark} args={[6.2, 2.5, 6.2]} radius={0.25} />
       {[
         [-3.0, -3.0],
         [3.0, -3.0],
@@ -425,16 +416,16 @@ function Spire({ accent }: { accent: string }) {
   return (
     <group>
       <mesh position={[0, 0.55, 0]} receiveShadow material={MAT.stoneDark}>
-        <cylinderGeometry args={[3.6, 3.9, 1.1, 10]} />
+        <cylinderGeometry args={[3.6, 3.9, 1.1, 16]} />
       </mesh>
       <mesh position={[0, 6.5, 0]} castShadow receiveShadow material={MAT.stone}>
-        <cylinderGeometry args={[2.4, 3.2, 12, 10]} />
+        <cylinderGeometry args={[2.4, 3.2, 12, 16]} />
       </mesh>
       <mesh position={[0, 13.2, 0]} material={MAT.stoneDark}>
-        <cylinderGeometry args={[2.7, 2.5, 0.5, 10]} />
+        <cylinderGeometry args={[2.7, 2.5, 0.5, 16]} />
       </mesh>
       <mesh position={[0, 15.4, 0]} castShadow material={MAT.roof}>
-        <coneGeometry args={[3.2, 4.2, 10]} />
+        <coneGeometry args={[3.2, 4.2, 14]} />
       </mesh>
 
       {/* warm lower windows + the glowing top chamber */}
@@ -470,9 +461,7 @@ function Market({ accent }: { accent: string }) {
   return (
     <group>
       {/* back storage shed */}
-      <mesh position={[0, 1.5, -1.9]} castShadow receiveShadow material={MAT.woodDark}>
-        <boxGeometry args={[8.4, 3.0, 3.4]} />
-      </mesh>
+      <RBox position={[0, 1.5, -1.9]} castShadow receiveShadow material={MAT.woodDark} args={[8.4, 3.0, 3.4]} radius={0.22} />
       <mesh position={[0, 3.15, -1.9]} material={MAT.roof}>
         <boxGeometry args={[9.0, 0.3, 4.0]} />
       </mesh>
@@ -512,9 +501,7 @@ function Market({ accent }: { accent: string }) {
         [3.6, 5.0, 1.1],
         [4.3, 5.6, 0.75],
       ].map(([x, z, s], i) => (
-        <mesh key={i} position={[x, (s * 1.0) / 2, z]} rotation-y={i} castShadow material={MAT.woodDark}>
-          <boxGeometry args={[s, s, s]} />
-        </mesh>
+        <RBox key={i} position={[x, (s * 1.0) / 2, z]} rotation-y={i} castShadow material={MAT.woodDark} args={[s, s, s]} radius={0.08} />
       ))}
 
       <Sign accent={accent} pos={[0, 2.9, 4.3]} />
@@ -528,9 +515,7 @@ function Tavern({ accent }: { accent: string }) {
       <mesh position={[0, 0.35, 0]} receiveShadow material={MAT.stoneDark}>
         <boxGeometry args={[12.5, 0.7, 9.5]} />
       </mesh>
-      <mesh position={[0, 2.5, 0]} castShadow receiveShadow material={MAT.woodDark}>
-        <boxGeometry args={[12, 5, 9]} />
-      </mesh>
+      <RBox position={[0, 2.5, 0]} castShadow receiveShadow material={MAT.woodDark} args={[12, 5, 9]} radius={0.3} />
       {/* timber framing on the facade */}
       {[-4.5, -1.6, 1.6, 4.5].map((x) => (
         <mesh key={x} position={[x, 2.5, 4.56]} material={MAT.woodLight}>
@@ -626,9 +611,7 @@ function Gate({ accent }: { accent: string }) {
           <mesh position={[x, 0.5, 0]} receiveShadow material={MAT.stoneDark}>
             <boxGeometry args={[2.2, 1.0, 2.2]} />
           </mesh>
-          <mesh position={[x, 4, 0]} castShadow material={MAT.stone}>
-            <boxGeometry args={[1.6, 8, 1.6]} />
-          </mesh>
+          <RBox position={[x, 4, 0]} castShadow material={MAT.stone} args={[1.6, 8, 1.6]} radius={0.22} />
           {/* rune plaque */}
           <mesh position={[x, 5.2, 0.85]} material={accentMat(accent, 0.5)}>
             <boxGeometry args={[0.6, 1.1, 0.08]} />
@@ -642,9 +625,7 @@ function Gate({ accent }: { accent: string }) {
           </mesh>
         </group>
       ))}
-      <mesh position={[0, 8.3, 0]} castShadow material={MAT.stoneDark}>
-        <boxGeometry args={[9, 1.4, 1.8]} />
-      </mesh>
+      <RBox position={[0, 8.3, 0]} castShadow material={MAT.stoneDark} args={[9, 1.4, 1.8]} radius={0.25} />
 
       {/* the portal itself */}
       <mesh position={[0, 4, 0]} material={portalMat}>

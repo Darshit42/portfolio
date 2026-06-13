@@ -50,14 +50,14 @@ export default function PlazaTotem() {
 
       {/* central monument */}
       <mesh position={[0, 2.0, 0]} castShadow material={MAT.stone}>
-        <cylinderGeometry args={[0.55, 1.0, 3.0, 6]} />
+        <cylinderGeometry args={[0.55, 1.0, 3.0, 12]} />
       </mesh>
       {/* the glowing heart — exposed above the column, past the bloom threshold */}
       <mesh position={[0, 4.05, 0]} material={MAT.warmCore}>
-        <cylinderGeometry args={[0.34, 0.3, 1.1, 6]} />
+        <cylinderGeometry args={[0.34, 0.3, 1.1, 12]} />
       </mesh>
       <mesh position={[0, 4.95, 0]} castShadow material={MAT.stoneDark}>
-        <coneGeometry args={[0.62, 0.8, 6]} />
+        <coneGeometry args={[0.62, 0.8, 10]} />
       </mesh>
       <mesh position={[0, 5.55, 0]} material={MAT.warmCore}>
         <octahedronGeometry args={[0.32]} />

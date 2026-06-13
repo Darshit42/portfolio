@@ -117,7 +117,7 @@ export default function Torches() {
     <group>
       {/* poles — one instanced draw call */}
       <Instances limit={torches.length} castShadow>
-        <cylinderGeometry args={[0.07, 0.11, 2.3, 6]} />
+        <cylinderGeometry args={[0.07, 0.11, 2.3, 8]} />
         <primitive object={MAT.woodDark} attach="material" />
         {torches.map((t, i) => (
           <Instance key={i} position={[t.x, 1.15, t.z]} />
@@ -126,7 +126,7 @@ export default function Torches() {
 
       {/* flames — one instanced draw call, blooms past the threshold */}
       <Instances limit={torches.length}>
-        <coneGeometry args={[0.16, 0.5, 6]} />
+        <coneGeometry args={[0.16, 0.5, 8]} />
         <primitive object={MAT.flame} attach="material" />
         {torches.map((t, i) => (
           <Instance key={i} position={[t.x, 2.5, t.z]} />

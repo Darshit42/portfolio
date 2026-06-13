@@ -6,6 +6,7 @@ import { BUILDINGS, PLAZA_CENTER, WORLD_BOUNDS } from "../data/buildings";
 import { useGameStore } from "../store/useGameStore";
 import { isTouchDevice } from "./webgl";
 import { MAT } from "./materials";
+import { RBox } from "./RBox";
 import { mulberry32, clearOfStructures } from "./rand";
 
 /**
@@ -163,7 +164,7 @@ export default function Decor() {
     <group>
       {/* pines — trunk + two foliage tiers, three instanced draw calls */}
       <Instances limit={trees.length} castShadow>
-        <cylinderGeometry args={[0.22, 0.32, 2, 6]} />
+        <cylinderGeometry args={[0.22, 0.32, 2, 8]} />
         <primitive object={MAT.trunk} attach="material" />
         {trees.map((t, i) => (
           <Instance key={i} position={[t.x, t.s, t.z]} scale={[1, t.s, 1]} rotation-y={t.rot} />
@@ -280,9 +281,7 @@ export default function Decor() {
         [14.5, -18.9, 0.7, 1.1],
         [13.9, -20.5, 0.6, 0.7],
       ].map(([x, z, s, r], i) => (
-        <mesh key={i} position={[x, s / 2, z]} rotation-y={r} castShadow material={MAT.woodDark}>
-          <boxGeometry args={[s, s, s]} />
-        </mesh>
+        <RBox key={i} position={[x, s / 2, z]} rotation-y={r} castShadow material={MAT.woodDark} args={[s, s, s]} radius={0.08} />
       ))}
 
       {/* drifting ground-fog wisps — desktop + motion only */}
