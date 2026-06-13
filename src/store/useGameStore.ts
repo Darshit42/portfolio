@@ -276,6 +276,11 @@ export const useGameStore = create<GameState>((set, get) => ({
 /** Derived selector: are all relics found? */
 export const selectGateOpen = (s: GameState): boolean => s.foundRelics.size >= TOTAL_RELICS;
 
+// Dev-only handle for the screenshot driver (programmatic arena/travel etc.).
+if (import.meta.env.DEV && typeof window !== "undefined") {
+  (window as unknown as { __store: typeof useGameStore }).__store = useGameStore;
+}
+
 // Persist relics + settings locally (F22). The persist() helper no-ops unless
 // the flag is on and only writes when the snapshot actually changes.
 useGameStore.subscribe((s) =>
