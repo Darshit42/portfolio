@@ -92,6 +92,43 @@ export const NPCS: Npc[] = [
       { text: "Would you hear the whole of my making?" },
     ],
   },
+  // ---- flavor NPCs (no project) ----
+  {
+    id: "merchant",
+    name: "Wandering Merchant",
+    building: "finddder-market",
+    position: [-23, 13],
+    facing: Math.PI / 2,
+    accent: "#f2b94c",
+    lines: [
+      { text: "Scavenged wares, scouted bargains! I find what others overlook." },
+      { text: "Slay a few bugs and bring me coin — the realm rewards a busy blade." },
+    ],
+  },
+  {
+    id: "blacksmith",
+    name: "The Blacksmith",
+    building: "agent-forge",
+    position: [23.5, 3],
+    facing: Math.PI,
+    accent: "#ff6622",
+    lines: [
+      { text: "Bring me scrap and ember and I'll forge you something worth swinging." },
+      { text: "Everything in this town was hammered into shape. You included, soon enough." },
+    ],
+  },
+  {
+    id: "guard",
+    name: "Gate Sentinel",
+    building: "gate-of-contact",
+    position: [6, 35],
+    facing: Math.PI,
+    accent: "#9aa6bf",
+    lines: [
+      { text: "Halt. The Gate of Contact opens only to those who've gathered every relic." },
+      { text: "Six legends, traveller. Earn them, and the way south is yours." },
+    ],
+  },
 ];
 
 export const npcById = (id: string): Npc | undefined =>
