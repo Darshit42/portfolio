@@ -11,6 +11,7 @@ import Torches from "./Torches";
 import Player from "./Player";
 import Npcs from "./Npcs";
 import Enemies from "./Enemies";
+import Pickups from "./Pickups";
 import Interior from "./Interior";
 import Secrets from "./Secrets";
 import Particles from "./Particles";
@@ -51,6 +52,7 @@ export default function World() {
         <PlazaTotem />
         {FEATURES.npcs && <Npcs />}
         {FEATURES.combat && <Enemies />}
+        {FEATURES.combat && <Pickups />}
         {FEATURES.interiors && <Interior />}
         <Secrets />
         <Player />

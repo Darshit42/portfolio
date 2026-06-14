@@ -42,6 +42,7 @@ export function useKeyboardControls(opts: {
   onInteract: () => void;
   onToggleMap: () => void;
   onToggleHelp: () => void;
+  onToggleInventory: () => void;
   onPause: () => void;
   onAttack: () => void;
 }) {
@@ -68,6 +69,10 @@ export function useKeyboardControls(opts: {
           break;
         case "m":
           opts.onToggleMap();
+          break;
+        case "i":
+        case "b":
+          opts.onToggleInventory();
           break;
         case "?":
         case "/":

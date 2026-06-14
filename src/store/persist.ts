@@ -8,6 +8,8 @@ export interface Saved {
   foundRelics: string[];
   muted: boolean;
   reducedMotion: boolean;
+  coins: number;
+  inventory: Record<string, number>;
 }
 
 const available = () => FEATURES.localSave && typeof localStorage !== "undefined";

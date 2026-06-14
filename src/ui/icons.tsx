@@ -106,6 +106,13 @@ export const SwordIcon = (p: P) => (
   </svg>
 );
 
+export const BagIcon = (p: P) => (
+  <svg {...base(p)}>
+    <path d="M6 8h12l-1 12H7L6 8Z" />
+    <path d="M9 8a3 3 0 0 1 6 0" />
+  </svg>
+);
+
 export const RelicIcon = (p: P) => (
   <svg {...base(p)}>
     <path d="M12 2 4 7v10l8 5 8-5V7l-8-5Z" />

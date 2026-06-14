@@ -134,3 +134,8 @@ export function sfxHit(): void {
 export function sfxHurt(): void {
   tone(160, 0.18, "sawtooth", 0, 0.14);
 }
+
+export function sfxPickup(): void {
+  tone(880, 0.06, "square", 0, 0.11);
+  tone(1318.51, 0.09, "square", 0.05, 0.09);
+}

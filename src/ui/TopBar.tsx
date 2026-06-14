@@ -1,6 +1,7 @@
 import { FEATURES, OWNER } from "../data/config";
 import { useGameStore } from "../store/useGameStore";
 import {
+  BagIcon,
   DownloadIcon,
   GithubIcon,
   HelpIcon,
@@ -32,6 +33,11 @@ export default function TopBar() {
       <IconBtn label="Map / fast-travel (M)" onClick={() => setMode(mode === "fasttravel" ? "playing" : "fasttravel")}>
         <MapIcon width={18} height={18} />
       </IconBtn>
+      {FEATURES.combat && (
+        <IconBtn label="Inventory (I)" onClick={() => setMode(mode === "inventory" ? "playing" : "inventory")}>
+          <BagIcon width={18} height={18} />
+        </IconBtn>
+      )}
       <IconBtn label="Help (?)" onClick={toggleHelp}>
         <HelpIcon width={18} height={18} />
       </IconBtn>

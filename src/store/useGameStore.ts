@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { SPAWN, buildingById } from "../data/buildings";
 import { TOTAL_RELICS } from "../data/projects";
+import { itemDef } from "../data/items";
 import { loadSaved, persist } from "./persist";
 
 export const MAX_HEALTH = 5;
@@ -19,13 +20,14 @@ export type UiMode =
   | "fasttravel"
   | "recruiter"
   | "help"
-  | "paused";
+  | "paused"
+  | "inventory";
 
 /** Modes in which the 3D world is mounted and the player could be moving. */
-export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel", "help", "paused"];
+export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel", "help", "paused", "inventory"];
 
 /** Modes in which player input should be frozen (an overlay is up). */
-export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "title", "recruiter"];
+export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "inventory", "title", "recruiter"];
 
 export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door" | "secret";
 
@@ -69,6 +71,10 @@ export interface GameState {
 
   // ---- day/night ----
   daySegment: "night" | "dawn" | "day" | "dusk";
+
+  // ---- loot + inventory ----
+  coins: number;
+  inventory: Record<string, number>;
 
   // ---- combat (F13–F15, F17) ----
   health: number;
@@ -116,6 +122,10 @@ export interface GameState {
   stopArena: () => void;
   setArenaWave: (w: number) => void;
   notify: (text: string) => void;
+
+  addItem: (id: string, n?: number) => void;
+  useItem: (id: string) => void;
+  toggleInventory: () => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -140,6 +150,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   hasSeenControls: false,
 
   daySegment: "night",
+
+  coins: saved.coins ?? 0,
+  inventory: saved.inventory ?? {},
 
   health: MAX_HEALTH,
   maxHealth: MAX_HEALTH,
@@ -274,6 +287,40 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   stopArena: () => set({ arenaActive: false, arenaWave: 0 }),
   setArenaWave: (w) => set({ arenaWave: w }),
+
+  addItem: (id, n = 1) => {
+    const def = itemDef(id);
+    if (def.kind === "currency") {
+      set((s) => ({ coins: s.coins + n }));
+      return;
+    }
+    set((s) => ({
+      inventory: { ...s.inventory, [id]: Math.min(def.stack, (s.inventory[id] ?? 0) + n) },
+    }));
+  },
+
+  useItem: (id) => {
+    const have = get().inventory[id] ?? 0;
+    if (have <= 0) return;
+    const def = itemDef(id);
+    if (def.effect?.heal) {
+      set((s) => ({ health: Math.min(s.maxHealth, s.health + def.effect!.heal!) }));
+      get().notify(`Used ${def.name}`);
+    }
+    set((s) => {
+      const next = (s.inventory[id] ?? 0) - 1;
+      const inv = { ...s.inventory };
+      if (next <= 0) delete inv[id];
+      else inv[id] = next;
+      return { inventory: inv };
+    });
+  },
+
+  toggleInventory: () => {
+    const m = get().mode;
+    if (m === "inventory") set({ mode: "playing" });
+    else if (m === "playing") set({ mode: "inventory" });
+  },
 }));
 
 /** Derived selector: are all relics found? */
@@ -291,5 +338,7 @@ useGameStore.subscribe((s) =>
     foundRelics: [...s.foundRelics],
     muted: s.muted,
     reducedMotion: s.reducedMotion,
+    coins: s.coins,
+    inventory: s.inventory,
   }),
 );

@@ -11,6 +11,7 @@ export default function HUD() {
   const maxHealth = useGameStore((s) => s.maxHealth);
   const arenaActive = useGameStore((s) => s.arenaActive);
   const arenaWave = useGameStore((s) => s.arenaWave);
+  const coins = useGameStore((s) => s.coins);
   const n = found.size;
 
   return (
@@ -43,6 +44,9 @@ export default function HUD() {
               Arena {arenaWave}/{ARENA_WAVES}
             </span>
           )}
+          <span className="ml-auto flex items-center gap-1 font-mono text-xs font-semibold text-realm-gold">
+            🪙 {coins.toLocaleString()}
+          </span>
         </div>
       )}
 

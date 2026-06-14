@@ -10,6 +10,7 @@ import InteractPrompt from "../ui/InteractPrompt";
 import CodexModal from "../ui/CodexModal";
 import ContactModal from "../ui/ContactModal";
 import DialogBox from "../ui/DialogBox";
+import InventoryPanel from "../ui/InventoryPanel";
 import FastTravel from "../ui/FastTravel";
 import HelpOverlay from "../ui/HelpOverlay";
 import PauseOverlay from "../ui/PauseOverlay";
@@ -47,6 +48,9 @@ export default function GameRoot() {
         else if (s.mode === "fasttravel") s.closeOverlay();
       },
       onToggleHelp: () => useGameStore.getState().toggleHelp(),
+      onToggleInventory: () => {
+        if (FEATURES.combat) useGameStore.getState().toggleInventory();
+      },
       onPause: () => {
         const s = useGameStore.getState();
         switch (s.mode) {
@@ -54,6 +58,9 @@ export default function GameRoot() {
           case "dialog":
           case "fasttravel":
             s.closeOverlay();
+            break;
+          case "inventory":
+            s.setMode("playing");
             break;
           case "help":
             s.toggleHelp();
@@ -74,7 +81,8 @@ export default function GameRoot() {
 
   useKeyboardControls(keyOpts);
 
-  const overlayUp = mode === "codex" || mode === "dialog" || mode === "fasttravel" || mode === "help" || mode === "paused";
+  const overlayUp =
+    mode === "codex" || mode === "dialog" || mode === "fasttravel" || mode === "help" || mode === "paused" || mode === "inventory";
 
   return (
     <div className="relative h-full w-full overflow-hidden bg-realm-bg">
@@ -101,6 +109,7 @@ export default function GameRoot() {
       {/* overlays */}
       {mode === "codex" && (activeGate ? <ContactModal /> : <CodexModal />)}
       {mode === "dialog" && <DialogBox />}
+      {mode === "inventory" && <InventoryPanel />}
       {mode === "fasttravel" && <FastTravel />}
       {mode === "help" && <HelpOverlay touch={touch} />}
       {mode === "paused" && <PauseOverlay />}
