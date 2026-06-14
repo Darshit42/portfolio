@@ -107,6 +107,9 @@ export interface GameState {
   markControlsSeen: () => void;
   setDaySegment: (s: GameState["daySegment"]) => void;
 
+  /** Set by the loot system; called when a mob dies so drops can spawn. */
+  onMobKilled?: (mobId: string, x: number, z: number) => void;
+
   damagePlayer: (n: number) => void;
   healToFull: () => void;
   startArena: () => void;

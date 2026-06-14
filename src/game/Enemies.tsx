@@ -1,21 +1,23 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector3, type Group } from "three";
 import { WORLD_BOUNDS, buildingById } from "../data/buildings";
 import { FEATURES } from "../data/config";
-import { ARENA_POOL, MOBS, MOB_ORDER, pickMob, type MobType } from "../data/mobs";
+import { ARENA_POOL, MOBS, pickMob, type MobType } from "../data/mobs";
+import { spriteDef, type Facing, type SpriteDef } from "../data/sprites";
 import { ARENA_WAVES, FROZEN_MODES, useGameStore } from "../store/useGameStore";
 import { sfxHit, sfxHurt } from "../audio/audio";
 import { playerState } from "./playerState";
 import { combat, consumeAttack } from "./combat";
-import MobMesh from "./mobMeshes";
+import SpriteActor, { makeCtrl } from "./SpriteActor";
 
 const MAX = 12;
-const WORLD_COUNT = 6; // slots 0..5 roam the world; 6..11 are the arena pool
-const ATTACK_RANGE = 3.0; // forgiving omnidirectional player swing
+const WORLD_COUNT = 6;
+const ATTACK_RANGE = 3.0;
 const RESPAWN_DELAY = 6000;
 const INVULN = 1500;
 const KNOCKBACK = 1.6;
+const DIE_MS = 480; // hold the death animation before despawning
 
 const WORLD_ANCHORS: [number, number][] = [
   [-34, -26],
@@ -29,6 +31,9 @@ const WORLD_ANCHORS: [number, number][] = [
 const ARENA = buildingById("the-arena");
 const ARENA_CENTER: [number, number] = ARENA ? ARENA.position : [19, 17];
 
+const facingOf = (vx: number, vz: number): Facing =>
+  Math.abs(vx) > Math.abs(vz) ? (vx > 0 ? "right" : "left") : vz > 0 ? "down" : "up";
+
 interface E {
   pos: Vector3;
   vx: number;
@@ -41,6 +46,7 @@ interface E {
   hp: number;
   respawnAt: number;
   hitUntil: number;
+  dyingUntil: number;
   mode: "world" | "arena";
   type: MobType;
 }
@@ -48,16 +54,16 @@ interface E {
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 
 /**
- * Roaming mobs (F13–F15) + the Arena wave driver (F17). The whole sim runs
- * off-React in one useFrame, mutating mesh refs directly. Each slot mounts all
- * mob-mesh variants and shows the one matching its current kind, so a slot can
- * change kind at runtime with no re-render. Kinds are chosen by the day/night
- * segment, so the bestiary shifts as time passes. Combat stays generous:
- * low-HP mobs, a forgiving swing, respawn-to-Tavern on defeat.
+ * Roaming mobs (F13–F15) + the Arena wave driver (F17), now rendered as pixel
+ * sprites. The sim runs off-React in one useFrame mutating per-slot transform
+ * groups + sprite controls; each slot shows ONE SpriteActor whose def is React
+ * state (changed only when a slot's kind changes — infrequent). Kinds are
+ * chosen by the day/night segment. Death plays a one-shot 'die' before despawn.
  */
 export default function Enemies() {
   const slots = useRef<(Group | null)[]>([]);
-  const variants = useRef<(Group | null)[][]>([]);
+  const bobs = useRef<(Group | null)[]>([]);
+  const ctrls = useRef(Array.from({ length: MAX }, () => makeCtrl("down")));
   const prevArena = useRef(false);
   const waveSpawned = useRef(0);
   const prevSegment = useRef<string>("");
@@ -77,14 +83,25 @@ export default function Enemies() {
         hp: MOBS.bug.hp,
         respawnAt: 0,
         hitUntil: 0,
+        dyingUntil: 0,
         mode: i < WORLD_COUNT ? "world" : "arena",
         type: MOBS.bug,
       };
     }),
   );
 
+  // Per-slot sprite def lives in React state; only changes when a slot's kind
+  // changes, so the per-frame sim never re-renders.
+  const [defs, setDefs] = useState<SpriteDef[]>(() => data.current.map((e) => spriteDef(e.type.id)));
+  const dirty = useRef(false);
+
+  const setType = (e: E, type: MobType) => {
+    if (e.type.id !== type.id) dirty.current = true;
+    e.type = type;
+  };
+
   const spawnArenaWave = (n: number) => {
-    const count = Math.min(2 + n, MAX - WORLD_COUNT); // wave 1=3, 2=4, 3=5
+    const count = Math.min(2 + n, MAX - WORLD_COUNT);
     for (let s = WORLD_COUNT; s < MAX; s++) {
       const e = data.current[s];
       const idx = s - WORLD_COUNT;
@@ -94,8 +111,8 @@ export default function Enemies() {
         e.alive = true;
         e.active = true;
         e.hitUntil = 0;
-        // deeper waves pull from later (tougher) entries in the pool
-        e.type = MOBS[ARENA_POOL[Math.min(ARENA_POOL.length - 1, Math.floor(idx / 2 + (n - 1)) % ARENA_POOL.length)]];
+        e.dyingUntil = 0;
+        setType(e, MOBS[ARENA_POOL[Math.min(ARENA_POOL.length - 1, Math.floor(idx / 2 + (n - 1)) % ARENA_POOL.length)]]);
         e.hp = e.type.hp;
       } else {
         e.active = false;
@@ -111,12 +128,13 @@ export default function Enemies() {
       if (s < WORLD_COUNT) {
         const a = WORLD_ANCHORS[s];
         e.pos.set(a[0], 0, a[1]);
-        e.type = pickMob(segment, Math.random());
+        setType(e, pickMob(segment, Math.random()));
         e.alive = true;
         e.active = true;
         e.hp = e.type.hp;
         e.respawnAt = 0;
         e.hitUntil = 0;
+        e.dyingUntil = 0;
         e.mode = "world";
       } else {
         e.active = false;
@@ -135,12 +153,11 @@ export default function Enemies() {
 
     const now = performance.now();
     const tSec = state.clock.elapsedTime;
+    const dt = Math.min(delta, 0.05);
     const arena = st.arenaActive;
     const ppos = playerState.pos;
     const reduced = st.reducedMotion;
-    const dt = Math.min(delta, 0.05);
 
-    // arena enter/leave transitions
     if (arena !== prevArena.current) {
       if (arena) {
         for (let s = 0; s < WORLD_COUNT; s++) {
@@ -156,7 +173,6 @@ export default function Enemies() {
       prevArena.current = arena;
     }
 
-    // day/night segment shift → re-roll the world bestiary (not mid-arena)
     if (!arena && st.daySegment !== prevSegment.current) {
       setupWorld(st.daySegment);
       prevSegment.current = st.daySegment;
@@ -168,17 +184,30 @@ export default function Enemies() {
     for (let s = 0; s < MAX; s++) {
       const e = data.current[s];
       const slot = slots.current[s];
+      const ctrl = ctrls.current[s];
       if (!e.active) {
         if (slot) slot.visible = false;
         continue;
       }
+
+      // dead → maybe still playing the death animation, else respawn or hide
       if (!e.alive) {
+        if (now < e.dyingUntil) {
+          // hold death pose; no AI/damage
+          if (slot) {
+            slot.visible = true;
+            slot.position.set(e.pos.x, 0, e.pos.z);
+            slot.scale.setScalar(e.type.scale);
+          }
+          continue;
+        }
         if (e.mode === "world" && now >= e.respawnAt) {
           const a = WORLD_ANCHORS[s % WORLD_ANCHORS.length];
           e.pos.set(a[0], 0, a[1]);
-          e.type = pickMob(st.daySegment, Math.random());
+          setType(e, pickMob(st.daySegment, Math.random()));
           e.alive = true;
           e.hp = e.type.hp;
+          ctrl.oneShot = null;
         } else {
           if (slot) slot.visible = false;
           continue;
@@ -225,8 +254,12 @@ export default function Enemies() {
         e.pos.z -= (dz / dist) * KNOCKBACK;
         if (e.hp <= 0) {
           e.alive = false;
+          e.dyingUntil = now + DIE_MS;
           e.respawnAt = now + RESPAWN_DELAY;
+          ctrl.oneShot = "die";
+          ctrl.oneShotSeq++;
           sfxHit();
+          st.onMobKilled?.(e.type.id, e.pos.x, e.pos.z);
         }
       }
 
@@ -239,24 +272,27 @@ export default function Enemies() {
 
       if (e.alive && e.mode === "arena") arenaAlive++;
 
+      // drive the sprite
+      ctrl.move = "walk";
+      ctrl.facing = facingOf(e.vx, e.vz);
+
       if (slot) {
-        slot.visible = e.alive;
-        // vertical motion by kind
-        let y = ty.baseY;
+        slot.visible = true;
+        slot.position.set(e.pos.x, 0, e.pos.z);
+        slot.scale.setScalar(ty.scale * (now < e.hitUntil ? 1.2 : 1));
+      }
+      const bob = bobs.current[s];
+      if (bob) {
+        let y = 0;
         if (!reduced) {
           if (ty.bob === "float") y = ty.baseY + Math.sin(tSec * 2 + s) * 0.28;
-          else if (ty.bob === "hop") y = Math.abs(Math.sin(tSec * 4 + s)) * 0.5;
-        }
-        slot.position.set(e.pos.x, y, e.pos.z);
-        slot.rotation.y = Math.atan2(e.vx, e.vz);
-        slot.scale.setScalar(ty.scale * (now < e.hitUntil ? 1.25 : 1));
-        // show the variant matching this slot's current kind
-        const vs = variants.current[s];
-        if (vs) for (let k = 0; k < MOB_ORDER.length; k++) if (vs[k]) vs[k]!.visible = e.type.id === MOB_ORDER[k];
+          else if (ty.bob === "hop") y = Math.abs(Math.sin(tSec * 4 + s)) * 0.45;
+          else y = ty.baseY;
+        } else y = ty.baseY;
+        bob.position.y = y;
       }
     }
 
-    // arena wave progression
     if (arena && arenaAlive === 0 && waveSpawned.current > 0) {
       if (waveSpawned.current < ARENA_WAVES) {
         const next = waveSpawned.current + 1;
@@ -268,6 +304,11 @@ export default function Enemies() {
         st.notify("The Arena is cleared! 🏆");
         st.stopArena();
       }
+    }
+
+    if (dirty.current) {
+      dirty.current = false;
+      setDefs(data.current.map((e) => spriteDef(e.type.id)));
     }
   });
 
@@ -281,17 +322,18 @@ export default function Enemies() {
           }}
           visible={false}
         >
-          {MOB_ORDER.map((id, k) => (
-            <group
-              key={id}
-              ref={(el) => {
-                (variants.current[i] ??= [])[k] = el;
-              }}
-              visible={false}
-            >
-              <MobMesh id={id} accent={MOBS[id].accent} />
-            </group>
-          ))}
+          {/* ground shadow stays put while the sprite bobs */}
+          <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0]}>
+            <circleGeometry args={[0.42, 14]} />
+            <meshBasicMaterial color="#000000" transparent opacity={0.28} />
+          </mesh>
+          <group
+            ref={(el) => {
+              bobs.current[i] = el;
+            }}
+          >
+            <SpriteActor def={defs[i]} ctrl={ctrls.current[i]} />
+          </group>
         </group>
       ))}
     </group>
