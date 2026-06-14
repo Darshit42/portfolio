@@ -62,6 +62,7 @@ export default function DayNightController({ touch }: { touch: boolean }) {
     daynight.sunDiscOpacity = s.sunDiscOpacity;
     daynight.moonDiscOpacity = s.moonDiscOpacity;
     daynight.warm = 1 - s.sunDiscOpacity * 0.85;
+    daynight.spriteTint = 0.58 + 0.42 * s.sunDiscOpacity;
     daynight.sunDir[0] = s.sunDir[0];
     daynight.sunDir[1] = s.sunDir[1];
     daynight.sunDir[2] = s.sunDir[2];

@@ -6,11 +6,13 @@ import { NPCS } from "../data/npcs";
 import { DOORS } from "../data/interiors";
 import { SECRETS } from "../data/quests";
 import { FEATURES } from "../data/config";
+import { SPRITES, type Facing } from "../data/sprites";
 import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameStore";
 import { playerState } from "./playerState";
 import { resolveMove } from "./collision";
 import { getMoveVector } from "./useControls";
 import { combat } from "./combat";
+import SpriteActor, { makeCtrl } from "./SpriteActor";
 
 const SPEED = 9; // units / second
 const PROX = 3.6; // interaction radius from a building's approach point
@@ -26,17 +28,16 @@ interface InteractPoint {
   data: Interactable;
 }
 
-function lerpAngle(a: number, b: number, t: number): number {
-  let diff = b - a;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  return a + diff * t;
+/** Map a world move direction to a 4-way sprite facing. */
+function facingOf(nx: number, nz: number): Facing {
+  return Math.abs(nx) > Math.abs(nz) ? (nx > 0 ? "right" : "left") : nz > 0 ? "down" : "up";
 }
 
 export default function Player() {
   const group = useRef<Group>(null);
-  const body = useRef<Group>(null);
   const swing = useRef<Mesh>(null);
+  const ctrl = useRef(makeCtrl("down"));
+  const lastAttack = useRef(combat.lastAttackAt);
 
   // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
@@ -96,18 +97,19 @@ export default function Player() {
       const nz = wz / l;
       resolveMove(playerState.pos, nx * SPEED * dt, nz * SPEED * dt);
       playerState.facing = Math.atan2(nx, nz);
+      ctrl.current.facing = facingOf(nx, nz);
       moving = true;
     }
     playerState.moving = moving;
+    ctrl.current.move = moving ? "walk" : "idle";
 
-    if (group.current) {
-      group.current.position.copy(playerState.pos);
-      group.current.rotation.y = lerpAngle(group.current.rotation.y, playerState.facing, 0.18);
-    }
-    if (body.current) {
-      // subtle walk bob
-      const t = performance.now() / 1000;
-      body.current.position.y = moving && !st.reducedMotion ? Math.abs(Math.sin(t * 10)) * 0.12 : 0;
+    if (group.current) group.current.position.copy(playerState.pos);
+
+    // fire the attack animation (one-shot) when a swing happens
+    if (combat.lastAttackAt !== lastAttack.current) {
+      lastAttack.current = combat.lastAttackAt;
+      ctrl.current.oneShot = "attack";
+      ctrl.current.oneShotSeq++;
     }
 
     // attack swing shockwave
@@ -138,11 +140,11 @@ export default function Player() {
   });
 
   return (
-    <group ref={group} position={[playerState.pos.x, 0, playerState.pos.z]} rotation-y={playerState.facing}>
+    <group ref={group} position={[playerState.pos.x, 0, playerState.pos.z]}>
       {/* contact shadow */}
       <mesh rotation-x={-Math.PI / 2} position={[0, 0.03, 0]}>
-        <circleGeometry args={[0.85, 20]} />
-        <meshBasicMaterial color="#000000" transparent opacity={0.28} />
+        <circleGeometry args={[0.7, 20]} />
+        <meshBasicMaterial color="#000000" transparent opacity={0.3} />
       </mesh>
 
       {/* attack swing shockwave (combat only) */}
@@ -157,28 +159,7 @@ export default function Player() {
           player reads everywhere, even between torch pools (§8 readability) */}
       <pointLight position={[1.6, 3.2, 1.8]} color="#b89878" intensity={12} distance={8} decay={2} />
 
-      <group ref={body}>
-        {/* cloak / body */}
-        <mesh position={[0, 1.0, 0]} castShadow>
-          <cylinderGeometry args={[0.45, 0.7, 1.5, 12]} />
-          <meshStandardMaterial color="#3b6ea5" />
-        </mesh>
-        {/* head */}
-        <mesh position={[0, 2.0, 0]} castShadow>
-          <sphereGeometry args={[0.42, 16, 16]} />
-          <meshStandardMaterial color="#e8c29a" />
-        </mesh>
-        {/* hood trim */}
-        <mesh position={[0, 1.55, 0]} castShadow>
-          <cylinderGeometry args={[0.5, 0.5, 0.25, 12]} />
-          <meshStandardMaterial color="#e8c66a" emissive="#e8c66a" emissiveIntensity={0.25} />
-        </mesh>
-        {/* facing indicator (nose), points +z */}
-        <mesh position={[0, 2.0, 0.4]} rotation-x={Math.PI / 2} castShadow>
-          <coneGeometry args={[0.12, 0.3, 8]} />
-          <meshStandardMaterial color="#c98b5e" />
-        </mesh>
-      </group>
+      <SpriteActor def={SPRITES.player} ctrl={ctrl.current} />
     </group>
   );
 }

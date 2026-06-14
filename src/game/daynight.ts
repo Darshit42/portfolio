@@ -160,6 +160,8 @@ export const daynight = {
   moonDiscOpacity: 1,
   /** Warm-light dimmer: 1 at night, ~0.15 at noon — torches fade in daylight. */
   warm: 1,
+  /** Brightness tint for unlit sprites so they darken at night (0.55..1). */
+  spriteTint: 1,
   sunDir: [...MOON_DIR] as [number, number, number],
 };
 
