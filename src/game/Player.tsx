@@ -6,13 +6,13 @@ import { NPCS } from "../data/npcs";
 import { DOORS } from "../data/interiors";
 import { SECRETS } from "../data/quests";
 import { FEATURES } from "../data/config";
-import { SPRITES, type Facing } from "../data/sprites";
+import { rigConfig } from "../data/rigs";
 import { FROZEN_MODES, useGameStore, type Interactable } from "../store/useGameStore";
 import { playerState } from "./playerState";
 import { resolveMove } from "./collision";
 import { getMoveVector } from "./useControls";
 import { combat } from "./combat";
-import SpriteActor, { makeCtrl } from "./SpriteActor";
+import CharacterRig, { makeRigCtrl } from "./CharacterRig";
 
 const SPEED = 9; // units / second
 const PROX = 3.6; // interaction radius from a building's approach point
@@ -28,16 +28,12 @@ interface InteractPoint {
   data: Interactable;
 }
 
-/** Map a world move direction to a 4-way sprite facing. */
-function facingOf(nx: number, nz: number): Facing {
-  return Math.abs(nx) > Math.abs(nz) ? (nx > 0 ? "right" : "left") : nz > 0 ? "down" : "up";
-}
-
 export default function Player() {
   const group = useRef<Group>(null);
   const swing = useRef<Mesh>(null);
-  const ctrl = useRef(makeCtrl("down"));
+  const ctrl = useRef(makeRigCtrl(Math.PI));
   const lastAttack = useRef(combat.lastAttackAt);
+  const lastHit = useRef(combat.lastHitAt);
 
   // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
@@ -97,11 +93,11 @@ export default function Player() {
       const nz = wz / l;
       resolveMove(playerState.pos, nx * SPEED * dt, nz * SPEED * dt);
       playerState.facing = Math.atan2(nx, nz);
-      ctrl.current.facing = facingOf(nx, nz);
       moving = true;
     }
     playerState.moving = moving;
     ctrl.current.move = moving ? "walk" : "idle";
+    ctrl.current.heading = playerState.facing;
 
     if (group.current) group.current.position.copy(playerState.pos);
 
@@ -109,6 +105,12 @@ export default function Player() {
     if (combat.lastAttackAt !== lastAttack.current) {
       lastAttack.current = combat.lastAttackAt;
       ctrl.current.oneShot = "attack";
+      ctrl.current.oneShotSeq++;
+    }
+    // recoil when the player takes a hit
+    if (combat.lastHitAt !== lastHit.current) {
+      lastHit.current = combat.lastHitAt;
+      ctrl.current.oneShot = "hit";
       ctrl.current.oneShotSeq++;
     }
 
@@ -159,7 +161,7 @@ export default function Player() {
           player reads everywhere, even between torch pools (§8 readability) */}
       <pointLight position={[1.6, 3.2, 1.8]} color="#b89878" intensity={12} distance={8} decay={2} />
 
-      <SpriteActor def={SPRITES.player} ctrl={ctrl.current} />
+      <CharacterRig config={rigConfig("player")} ctrl={ctrl.current} />
     </group>
   );
 }

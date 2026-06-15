@@ -4,12 +4,12 @@ import { Vector3, type Group } from "three";
 import { WORLD_BOUNDS, buildingById } from "../data/buildings";
 import { FEATURES } from "../data/config";
 import { ARENA_POOL, MOBS, pickMob, type MobType } from "../data/mobs";
-import { spriteDef, type Facing, type SpriteDef } from "../data/sprites";
+import { rigConfig, type RigConfig } from "../data/rigs";
 import { ARENA_WAVES, FROZEN_MODES, useGameStore } from "../store/useGameStore";
 import { sfxHit, sfxHurt } from "../audio/audio";
 import { playerState } from "./playerState";
 import { combat, consumeAttack } from "./combat";
-import SpriteActor, { makeCtrl } from "./SpriteActor";
+import CharacterRig, { makeRigCtrl } from "./CharacterRig";
 
 const MAX = 12;
 const WORLD_COUNT = 6;
@@ -30,9 +30,6 @@ const WORLD_ANCHORS: [number, number][] = [
 
 const ARENA = buildingById("the-arena");
 const ARENA_CENTER: [number, number] = ARENA ? ARENA.position : [19, 17];
-
-const facingOf = (vx: number, vz: number): Facing =>
-  Math.abs(vx) > Math.abs(vz) ? (vx > 0 ? "right" : "left") : vz > 0 ? "down" : "up";
 
 interface E {
   pos: Vector3;
@@ -63,7 +60,7 @@ const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi 
 export default function Enemies() {
   const slots = useRef<(Group | null)[]>([]);
   const bobs = useRef<(Group | null)[]>([]);
-  const ctrls = useRef(Array.from({ length: MAX }, () => makeCtrl("down")));
+  const ctrls = useRef(Array.from({ length: MAX }, () => makeRigCtrl(0)));
   const prevArena = useRef(false);
   const waveSpawned = useRef(0);
   const prevSegment = useRef<string>("");
@@ -90,9 +87,9 @@ export default function Enemies() {
     }),
   );
 
-  // Per-slot sprite def lives in React state; only changes when a slot's kind
+  // Per-slot rig config lives in React state; only changes when a slot's kind
   // changes, so the per-frame sim never re-renders.
-  const [defs, setDefs] = useState<SpriteDef[]>(() => data.current.map((e) => spriteDef(e.type.id)));
+  const [configs, setConfigs] = useState<RigConfig[]>(() => data.current.map((e) => rigConfig(e.type.id)));
   const dirty = useRef(false);
 
   const setType = (e: E, type: MobType) => {
@@ -197,7 +194,7 @@ export default function Enemies() {
           if (slot) {
             slot.visible = true;
             slot.position.set(e.pos.x, 0, e.pos.z);
-            slot.scale.setScalar(e.type.scale);
+            slot.scale.setScalar(1);
           }
           continue;
         }
@@ -256,10 +253,14 @@ export default function Enemies() {
           e.alive = false;
           e.dyingUntil = now + DIE_MS;
           e.respawnAt = now + RESPAWN_DELAY;
-          ctrl.oneShot = "die";
+          ctrl.oneShot = "death";
           ctrl.oneShotSeq++;
           sfxHit();
           st.onMobKilled?.(e.type.id, e.pos.x, e.pos.z);
+        } else {
+          ctrl.oneShot = "hit";
+          ctrl.oneShotSeq++;
+          sfxHit();
         }
       }
 
@@ -272,14 +273,15 @@ export default function Enemies() {
 
       if (e.alive && e.mode === "arena") arenaAlive++;
 
-      // drive the sprite
+      // drive the rig
       ctrl.move = "walk";
-      ctrl.facing = facingOf(e.vx, e.vz);
+      ctrl.heading = Math.atan2(e.vx, e.vz);
+      ctrl.speed = speed / 3;
 
       if (slot) {
         slot.visible = true;
         slot.position.set(e.pos.x, 0, e.pos.z);
-        slot.scale.setScalar(ty.scale * (now < e.hitUntil ? 1.2 : 1));
+        slot.scale.setScalar(now < e.hitUntil ? 1.15 : 1);
       }
       const bob = bobs.current[s];
       if (bob) {
@@ -308,7 +310,7 @@ export default function Enemies() {
 
     if (dirty.current) {
       dirty.current = false;
-      setDefs(data.current.map((e) => spriteDef(e.type.id)));
+      setConfigs(data.current.map((e) => rigConfig(e.type.id)));
     }
   });
 
@@ -332,7 +334,7 @@ export default function Enemies() {
               bobs.current[i] = el;
             }}
           >
-            <SpriteActor def={defs[i]} ctrl={ctrls.current[i]} />
+            <CharacterRig config={configs[i]} ctrl={ctrls.current[i]} />
           </group>
         </group>
       ))}

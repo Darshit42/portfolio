@@ -2,9 +2,12 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group } from "three";
 import { NPCS, type Npc } from "../data/npcs";
-import { spriteDef } from "../data/sprites";
+import { rigConfig } from "../data/rigs";
 import { useGameStore } from "../store/useGameStore";
-import SpriteActor, { makeCtrl } from "./SpriteActor";
+import CharacterRig, { makeRigCtrl } from "./CharacterRig";
+
+// NPCs face the dimetric camera so the player sees them greet.
+const CAMERA_HEADING = Math.atan2(15, 18);
 
 /** Renders the NPCs (F16) as pixel sprites with a floating "talk" marker. */
 export default function Npcs() {
@@ -21,8 +24,7 @@ function NpcFigure({ npc }: { npc: Npc }) {
   const reduced = useGameStore((s) => s.reducedMotion);
   const near = useGameStore((s) => s.nearby?.kind === "npc" && s.nearby.id === npc.id);
   const marker = useRef<Group>(null);
-  // NPCs stand still and face the camera so the player sees them greet.
-  const ctrl = useRef(makeCtrl("down"));
+  const ctrl = useRef(makeRigCtrl(CAMERA_HEADING));
 
   useFrame((state) => {
     if (marker.current) {
@@ -40,7 +42,7 @@ function NpcFigure({ npc }: { npc: Npc }) {
         <meshBasicMaterial color="#000000" transparent opacity={0.28} />
       </mesh>
 
-      <SpriteActor def={spriteDef(npc.id)} ctrl={ctrl.current} />
+      <CharacterRig config={rigConfig(npc.id)} ctrl={ctrl.current} />
 
       {/* floating talk marker */}
       <group ref={marker} position={[0, 2.9, 0]}>
