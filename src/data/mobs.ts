@@ -4,7 +4,7 @@
  * visibly shifts with the day/night cycle. Combat stays light and generous.
  */
 
-export type MobId = "bug" | "wisp" | "slime" | "critter" | "bat" | "skeleton";
+export type MobId = "bug" | "wisp" | "slime" | "critter" | "bat" | "skeleton" | "zombie" | "goblin" | "spider" | "mushroom";
 export type BobStyle = "ground" | "float" | "hop";
 
 export interface MobType {
@@ -106,6 +106,58 @@ export const MOBS: Record<MobId, MobType> = {
     baseY: 0,
     accent: "#cfc9b8",
   },
+  zombie: {
+    id: "zombie",
+    name: "Zombie",
+    hp: 3,
+    wanderSpeed: 1.4,
+    chaseSpeed: 2.6,
+    detect: 11,
+    touch: 1.45,
+    scale: 1.0,
+    bob: "ground",
+    baseY: 0,
+    accent: "#6a8a5a",
+  },
+  goblin: {
+    id: "goblin",
+    name: "Goblin",
+    hp: 2,
+    wanderSpeed: 2.8,
+    chaseSpeed: 5.2,
+    detect: 14,
+    touch: 1.25,
+    scale: 0.85,
+    bob: "ground",
+    baseY: 0,
+    accent: "#c8a060",
+  },
+  spider: {
+    id: "spider",
+    name: "Spider",
+    hp: 2,
+    wanderSpeed: 2.4,
+    chaseSpeed: 4.8,
+    detect: 13,
+    touch: 1.35,
+    scale: 1.0,
+    bob: "ground",
+    baseY: 0,
+    accent: "#ff2244",
+  },
+  mushroom: {
+    id: "mushroom",
+    name: "Mushroom",
+    hp: 3,
+    wanderSpeed: 1.5,
+    chaseSpeed: 2.6,
+    detect: 10,
+    touch: 1.4,
+    scale: 1.0,
+    bob: "ground",
+    baseY: 0,
+    accent: "#c0392b",
+  },
 };
 
 /** Stable order for the per-slot mesh variants in <Enemies>. */
@@ -113,10 +165,10 @@ export const MOB_ORDER: MobId[] = ["bug", "wisp", "slime", "critter"];
 
 // Which kinds roam in each segment (repeats bias the odds).
 const POOLS: Record<string, MobId[]> = {
-  night: ["bug", "wisp", "skeleton", "bat", "bug"],
-  dawn: ["critter", "bug", "bat"],
-  day: ["slime", "critter", "critter"],
-  dusk: ["bug", "wisp", "bat", "critter"],
+  night: ["zombie", "spider", "skeleton", "bat", "goblin"],
+  dawn: ["critter", "goblin", "mushroom", "bat"],
+  day: ["slime", "mushroom", "critter", "goblin"],
+  dusk: ["zombie", "spider", "bat", "critter"],
 };
 
 export function pickMob(segment: string, r: number): MobType {
@@ -125,4 +177,4 @@ export function pickMob(segment: string, r: number): MobType {
 }
 
 /** The Arena throws the whole bestiary at you, deepening by wave. */
-export const ARENA_POOL: MobId[] = ["bug", "critter", "bat", "wisp", "slime", "skeleton"];
+export const ARENA_POOL: MobId[] = ["goblin", "spider", "zombie", "bat", "mushroom", "slime", "skeleton", "critter"];

@@ -70,6 +70,26 @@ const DROPS: Record<string, DropEntry[]> = {
     { item: "coin", chance: 0.45, min: 1, max: 2 },
     { item: "rune", chance: 0.12 },
   ],
+  zombie: [
+    { item: "bone", chance: 0.35 },
+    { item: "coin", chance: 0.5, min: 1, max: 2 },
+    { item: "scrap", chance: 0.2 },
+  ],
+  goblin: [
+    { item: "coin", chance: 0.7, min: 1, max: 3 },
+    { item: "scrap", chance: 0.25 },
+    { item: "ember", chance: 0.1 },
+  ],
+  spider: [
+    { item: "scrap", chance: 0.4 },
+    { item: "coin", chance: 0.45 },
+    { item: "heart", chance: 0.08 },
+  ],
+  mushroom: [
+    { item: "heart", chance: 0.18 },
+    { item: "ember", chance: 0.3 },
+    { item: "coin", chance: 0.4 },
+  ],
 };
 
 /** Roll a mob's drop table → a flat list of item ids (each unit is one pickup). */

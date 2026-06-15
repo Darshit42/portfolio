@@ -30,6 +30,13 @@ export function makeRigCtrl(heading = Math.PI): RigCtrl {
   return { move: "idle", heading, speed: 1, oneShot: null, oneShotSeq: 0 };
 }
 
+/** Bump seq and clear one-shots — call when a mob respawns in a reused slot. */
+export function resetRigCtrl(ctrl: RigCtrl) {
+  ctrl.move = "idle";
+  ctrl.oneShot = null;
+  ctrl.oneShotSeq++;
+}
+
 const DUR: Record<RigAnim, number> = { attack: 0.34, hit: 0.22, death: 0.55 };
 
 function lerpAngle(a: number, b: number, t: number): number {
@@ -68,13 +75,11 @@ export default function CharacterRig({ config, ctrl }: { config: RigConfig; ctrl
       }
     }
 
-    // one-shot trigger
+    // one-shot trigger (seq bump also clears a held death pose on respawn)
     if (ctrl.oneShotSeq !== a.lastSeq) {
       a.lastSeq = ctrl.oneShotSeq;
-      if (ctrl.oneShot) {
-        a.oneShot = ctrl.oneShot;
-        a.t = 0;
-      }
+      a.oneShot = ctrl.oneShot;
+      a.t = 0;
     }
     let u = 0;
     if (a.oneShot) {

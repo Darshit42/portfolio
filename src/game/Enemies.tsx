@@ -1,15 +1,15 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import { Vector3, type Group } from "three";
+import { Vector3, type Group, type Mesh } from "three";
 import { WORLD_BOUNDS, buildingById } from "../data/buildings";
 import { FEATURES } from "../data/config";
-import { ARENA_POOL, MOBS, pickMob, type MobType } from "../data/mobs";
+import { ARENA_POOL, MOBS, pickMob, type MobId, type MobType } from "../data/mobs";
 import { rigConfig, type RigConfig } from "../data/rigs";
 import { ARENA_WAVES, FROZEN_MODES, useGameStore } from "../store/useGameStore";
 import { sfxHit, sfxHurt } from "../audio/audio";
 import { playerState } from "./playerState";
 import { combat, consumeAttack } from "./combat";
-import CharacterRig, { makeRigCtrl } from "./CharacterRig";
+import MonsterRig, { makeRigCtrl, resetRigCtrl } from "./MonsterRig";
 
 const MAX = 12;
 const WORLD_COUNT = 6;
@@ -46,7 +46,11 @@ interface E {
   dyingUntil: number;
   mode: "world" | "arena";
   type: MobType;
+  posed?: boolean; // dev parade: stand still, face camera
 }
+
+// Face the dimetric camera (for the dev parade lineup).
+const PARADE_HEADING = Math.atan2(15, 18);
 
 const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi : v);
 
@@ -58,6 +62,7 @@ const clamp = (v: number, lo: number, hi: number) => (v < lo ? lo : v > hi ? hi 
  * chosen by the day/night segment. Death plays a one-shot 'die' before despawn.
  */
 export default function Enemies() {
+  const rootGroup = useRef<Group>(null);
   const slots = useRef<(Group | null)[]>([]);
   const bobs = useRef<(Group | null)[]>([]);
   const ctrls = useRef(Array.from({ length: MAX }, () => makeRigCtrl(0)));
@@ -92,6 +97,39 @@ export default function Enemies() {
   const [configs, setConfigs] = useState<RigConfig[]>(() => data.current.map((e) => rigConfig(e.type.id)));
   const dirty = useRef(false);
 
+  // Perf cap (Intel-UHD budget): mobs never cast real shadows — with up to 12
+  // multi-mesh rigs in the arena that shadow-map cost adds up. They keep the
+  // cheap fake contact circle; player + NPCs still cast. Re-applied whenever a
+  // slot's kind (and thus its meshes) changes.
+  useEffect(() => {
+    rootGroup.current?.traverse((o) => {
+      if ((o as Mesh).isMesh) (o as Mesh).castShadow = false;
+    });
+  }, [configs]);
+
+  // Dev-only: line up one of every monster near the player to eyeball the kit.
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    (window as unknown as { __parade: () => void }).__parade = () => {
+      const ids: MobId[] = ["zombie", "goblin", "spider", "bat", "slime", "mushroom", "skeleton", "critter", "wisp"];
+      const px = playerState.pos.x;
+      const pz = playerState.pos.z;
+      ids.forEach((id, i) => {
+        const e = data.current[i];
+        e.type = MOBS[id];
+        e.active = true;
+        e.alive = true;
+        e.hp = 999;
+        e.posed = true;
+        e.dyingUntil = 0;
+        e.mode = "world";
+        e.pos.set(px - 8 + i * 2, 0, pz + 3);
+      });
+      for (let i = ids.length; i < MAX; i++) data.current[i].active = false;
+      setConfigs(data.current.map((e) => rigConfig(e.type.id)));
+    };
+  }, []);
+
   const setType = (e: E, type: MobType) => {
     if (e.type.id !== type.id) dirty.current = true;
     e.type = type;
@@ -109,6 +147,7 @@ export default function Enemies() {
         e.active = true;
         e.hitUntil = 0;
         e.dyingUntil = 0;
+        resetRigCtrl(ctrls.current[s]);
         setType(e, MOBS[ARENA_POOL[Math.min(ARENA_POOL.length - 1, Math.floor(idx / 2 + (n - 1)) % ARENA_POOL.length)]]);
         e.hp = e.type.hp;
       } else {
@@ -133,6 +172,7 @@ export default function Enemies() {
         e.hitUntil = 0;
         e.dyingUntil = 0;
         e.mode = "world";
+        resetRigCtrl(ctrls.current[s]);
       } else {
         e.active = false;
         e.alive = false;
@@ -204,11 +244,25 @@ export default function Enemies() {
           setType(e, pickMob(st.daySegment, Math.random()));
           e.alive = true;
           e.hp = e.type.hp;
-          ctrl.oneShot = null;
+          resetRigCtrl(ctrl);
         } else {
           if (slot) slot.visible = false;
           continue;
         }
+      }
+
+      // dev parade: posed mobs stand still facing the camera
+      if (e.posed) {
+        ctrl.move = "idle";
+        ctrl.heading = PARADE_HEADING;
+        if (slot) {
+          slot.visible = true;
+          slot.position.set(e.pos.x, 0, e.pos.z);
+          slot.scale.setScalar(1);
+        }
+        const b = bobs.current[s];
+        if (b) b.position.y = e.type.baseY;
+        continue;
       }
 
       const ty = e.type;
@@ -274,7 +328,8 @@ export default function Enemies() {
       if (e.alive && e.mode === "arena") arenaAlive++;
 
       // drive the rig
-      ctrl.move = "walk";
+      const moving = speed > 0.15 && (Math.abs(e.vx) > 0.05 || Math.abs(e.vz) > 0.05);
+      ctrl.move = moving ? "walk" : "idle";
       ctrl.heading = Math.atan2(e.vx, e.vz);
       ctrl.speed = speed / 3;
 
@@ -315,7 +370,7 @@ export default function Enemies() {
   });
 
   return (
-    <group>
+    <group ref={rootGroup}>
       {Array.from({ length: MAX }, (_, i) => (
         <group
           key={i}
@@ -334,7 +389,7 @@ export default function Enemies() {
               bobs.current[i] = el;
             }}
           >
-            <CharacterRig config={configs[i]} ctrl={ctrls.current[i]} />
+            <MonsterRig config={configs[i]} ctrl={ctrls.current[i]} />
           </group>
         </group>
       ))}
