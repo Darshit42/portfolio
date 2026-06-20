@@ -20,7 +20,8 @@ export type BuildingKind =
   | "spire"
   | "market"
   | "tavern"
-  | "gate";
+  | "gate"
+  | "shrine";
 
 export interface Building {
   id: string;
@@ -48,8 +49,15 @@ export interface Building {
 export const SPAWN: [number, number] = [0, 23];
 export const PLAZA_CENTER: [number, number] = [0, 2];
 
-/** World bounds (player is clamped inside, with a margin from the edge). */
-export const WORLD_BOUNDS = { minX: -46, maxX: 46, minZ: -42, maxZ: 44 };
+/** World bounds — the rectangle that contains the playable disc (used for
+ *  ground sizing, decor scatter, and mob clamping). */
+export const WORLD_BOUNDS = { minX: -50, maxX: 50, minZ: -49, maxZ: 51 };
+
+/** The player roams a DISC (the forest is a ring, so a circle lets you reach
+ *  the treeline all the way around instead of stopping short on the diagonals).
+ *  Center matches the treeline center in Decor; radius sits just inside it. */
+export const WORLD_CENTER: [number, number] = [0, 1];
+export const WORLD_RADIUS = 48;
 
 export const BUILDINGS: Building[] = [
   {
@@ -112,6 +120,15 @@ export const BUILDINGS: Building[] = [
     half: [6, 6],
     accent: "#ff5470",
     solid: false, // open ring — the player fights inside it
+  },
+  {
+    id: "skill-shrine",
+    label: "Shrine of Mastery",
+    kind: "shrine",
+    position: [0, -30],
+    approach: [0, -22],
+    half: [3.5, 3.5],
+    accent: "#9b8cff",
   },
   {
     id: "null-pointer-tavern",

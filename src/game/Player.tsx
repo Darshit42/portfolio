@@ -38,11 +38,18 @@ export default function Player() {
   // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
     const fromBuildings: InteractPoint[] = BUILDINGS.filter(
-      (b) => b.projectId || b.kind === "gate",
+      (b) => b.projectId || b.kind === "gate" || b.kind === "shrine",
     ).map((b) => {
-      const kind = b.kind === "forge" ? "forge" : b.kind === "gate" ? "gate" : "relic";
+      const kind =
+        b.kind === "forge" ? "forge" : b.kind === "gate" ? "gate" : b.kind === "shrine" ? "skilltree" : "relic";
       const prompt =
-        kind === "forge" ? "Ignite the Forge" : kind === "gate" ? "Approach the Gate" : "Inspect relic";
+        kind === "forge"
+          ? "Ignite the Forge"
+          : kind === "gate"
+            ? "Approach the Gate"
+            : kind === "skilltree"
+              ? "Read the Skill Shrine"
+              : "Inspect relic";
       return {
         point: b.approach,
         data: { kind, id: b.id, label: b.label, prompt, projectId: b.projectId },

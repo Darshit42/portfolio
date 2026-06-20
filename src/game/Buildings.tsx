@@ -51,7 +51,9 @@ export default function Buildings() {
             />
           )}
 
-          {b.kind === "tavern" && <StructureLabel position={b.position} label={b.label} accent={b.accent} />}
+          {(b.kind === "tavern" || b.kind === "shrine") && (
+            <StructureLabel position={b.position} label={b.label} accent={b.accent} />
+          )}
           {b.kind === "gate" && <GateLabel position={b.position} label={b.label} />}
         </group>
       ))}

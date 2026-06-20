@@ -9,6 +9,7 @@ import TopBar from "../ui/TopBar";
 import InteractPrompt from "../ui/InteractPrompt";
 import CodexModal from "../ui/CodexModal";
 import ContactModal from "../ui/ContactModal";
+import SkillTreePanel from "../ui/SkillTreePanel";
 import DialogBox from "../ui/DialogBox";
 import InventoryPanel from "../ui/InventoryPanel";
 import FastTravel from "../ui/FastTravel";
@@ -33,6 +34,7 @@ import { doAttack } from "./combat";
 export default function GameRoot() {
   const mode = useGameStore((s) => s.mode);
   const activeGate = useGameStore((s) => s.activeGate);
+  const activeSkills = useGameStore((s) => s.activeSkills);
   const touch = useMemo(() => isTouchDevice(), []);
 
   // Stable handlers — read fresh state via getState so the effect never re-binds.
@@ -107,7 +109,7 @@ export default function GameRoot() {
       <ControlsHint touch={touch} />
 
       {/* overlays */}
-      {mode === "codex" && (activeGate ? <ContactModal /> : <CodexModal />)}
+      {mode === "codex" && (activeGate ? <ContactModal /> : activeSkills ? <SkillTreePanel /> : <CodexModal />)}
       {mode === "dialog" && <DialogBox />}
       {mode === "inventory" && <InventoryPanel />}
       {mode === "fasttravel" && <FastTravel />}

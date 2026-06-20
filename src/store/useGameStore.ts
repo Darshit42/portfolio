@@ -29,7 +29,7 @@ export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel"
 /** Modes in which player input should be frozen (an overlay is up). */
 export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "inventory", "title", "recruiter"];
 
-export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door" | "secret";
+export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door" | "secret" | "skilltree";
 
 export interface Interactable {
   kind: InteractableKind;
@@ -54,6 +54,7 @@ export interface GameState {
   activeDialog: string | null; // npc id
   activeForge: boolean; // forge demo panel open
   activeGate: boolean; // contact gate panel open
+  activeSkills: boolean; // skill-tree shrine panel open
 
   /** What the player is currently standing next to (drives the prompt). */
   nearby: Interactable | null;
@@ -94,6 +95,7 @@ export interface GameState {
   openForge: () => void;
   openDialog: (npcId: string) => void;
   openGate: () => void;
+  openSkills: () => void;
   /** Acts on whatever the player is standing next to (keyboard E or tap). */
   triggerInteract: () => void;
   closeOverlay: () => void;
@@ -139,6 +141,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeDialog: null,
   activeForge: false,
   activeGate: false,
+  activeSkills: false,
 
   nearby: null,
   travelTarget: null,
@@ -169,13 +172,17 @@ export const useGameStore = create<GameState>((set, get) => ({
   openRecruiter: () => set({ mode: "recruiter" }),
 
   openCodex: (projectId) =>
-    set({ mode: "codex", activeCodex: projectId, activeForge: false, activeGate: false, activeDialog: null }),
+    set({ mode: "codex", activeCodex: projectId, activeForge: false, activeGate: false, activeSkills: false, activeDialog: null }),
 
-  openForge: () => set({ mode: "codex", activeForge: true, activeGate: false, activeCodex: "self-healing-agent" }),
+  openForge: () =>
+    set({ mode: "codex", activeForge: true, activeGate: false, activeSkills: false, activeCodex: "self-healing-agent" }),
 
   openDialog: (npcId) => set({ mode: "dialog", activeDialog: npcId }),
 
-  openGate: () => set({ mode: "codex", activeGate: true, activeForge: false, activeCodex: null }),
+  openGate: () => set({ mode: "codex", activeGate: true, activeForge: false, activeSkills: false, activeCodex: null }),
+
+  openSkills: () =>
+    set({ mode: "codex", activeSkills: true, activeForge: false, activeGate: false, activeCodex: null }),
 
   triggerInteract: () => {
     const n = get().nearby;
@@ -193,6 +200,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       case "gate":
         if (selectGateOpen(get())) get().openGate();
+        break;
+      case "skilltree":
+        get().openSkills();
         break;
       case "npc":
         get().openDialog(n.id);
@@ -214,6 +224,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       activeDialog: null,
       activeForge: false,
       activeGate: false,
+      activeSkills: false,
     }),
 
   toggleHelp: () => {

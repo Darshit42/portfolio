@@ -39,7 +39,69 @@ export default function BuildingMesh({ kind, accent }: { kind: BuildingKind; acc
       return <Tavern accent={accent} />;
     case "gate":
       return <Gate accent={accent} />;
+    case "shrine":
+      return <Shrine accent={accent} />;
   }
+}
+
+/** The Shrine of Mastery — an arcane altar: stepped base, glowing rune circle,
+ *  central crystal, a bobbing orb and slowly orbiting runes. */
+function Shrine({ accent }: { accent: string }) {
+  const reduced = useGameStore((s) => s.reducedMotion);
+  const runes = useRef<Group>(null);
+  const orb = useRef<Mesh>(null);
+  useFrame((state) => {
+    if (reduced) return;
+    const t = state.clock.elapsedTime;
+    if (runes.current) runes.current.rotation.y = t * 0.5;
+    if (orb.current) {
+      orb.current.position.y = 4.6 + Math.sin(t * 1.5) * 0.2;
+      orb.current.rotation.y = t * 0.8;
+    }
+  });
+  return (
+    <group>
+      {/* stepped stone base */}
+      <mesh position={[0, 0.35, 0]} castShadow receiveShadow material={MAT.stoneDark}>
+        <cylinderGeometry args={[3.2, 3.6, 0.7, 8]} />
+      </mesh>
+      <mesh position={[0, 0.85, 0]} receiveShadow material={MAT.stone}>
+        <cylinderGeometry args={[2.4, 2.8, 0.5, 8]} />
+      </mesh>
+      {/* glowing rune circle on the dais */}
+      <mesh rotation-x={-Math.PI / 2} position={[0, 1.12, 0]} material={accentMat(accent, 0.9)}>
+        <ringGeometry args={[1.5, 2.0, 24]} />
+      </mesh>
+      {/* central crystal / obelisk */}
+      <mesh position={[0, 2.6, 0]} castShadow material={MAT.stone}>
+        <cylinderGeometry args={[0.4, 0.7, 2.8, 6]} />
+      </mesh>
+      <mesh position={[0, 3.9, 0]} material={accentMat(accent, 1.6)}>
+        <octahedronGeometry args={[0.6]} />
+      </mesh>
+      {/* bobbing orb */}
+      <mesh ref={orb} position={[0, 4.6, 0]} material={accentMat(accent, 1.9)}>
+        <icosahedronGeometry args={[0.45, 1]} />
+      </mesh>
+      {/* slowly orbiting runes */}
+      <group ref={runes} position={[0, 3.2, 0]}>
+        {[0, 1, 2, 3].map((i) => {
+          const a = (i / 4) * Math.PI * 2;
+          return (
+            <mesh
+              key={i}
+              position={[Math.cos(a) * 1.7, (i % 2) * 0.5 - 0.25, Math.sin(a) * 1.7]}
+              rotation-y={-a}
+              material={accentMat(accent, 1.4, true)}
+            >
+              <planeGeometry args={[0.4, 0.55]} />
+            </mesh>
+          );
+        })}
+      </group>
+      <pointLight position={[0, 3.5, 0]} color={accent} intensity={22} distance={11} decay={2} />
+    </group>
+  );
 }
 
 /* ------------------------------- shared bits ------------------------------ */
