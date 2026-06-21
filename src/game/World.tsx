@@ -10,6 +10,7 @@ import PlazaTotem from "./PlazaTotem";
 import Torches from "./Torches";
 import Player from "./Player";
 import Npcs from "./Npcs";
+import AgentTown from "../agents/AgentTown";
 import Enemies from "./Enemies";
 import Pickups from "./Pickups";
 import Interior from "./Interior";
@@ -50,7 +51,7 @@ export default function World() {
         <Buildings />
         <Torches />
         <PlazaTotem />
-        {FEATURES.npcs && <Npcs />}
+        {FEATURES.npcs && (FEATURES.agentTown ? <AgentTown /> : <Npcs />)}
         {FEATURES.combat && <Enemies />}
         {FEATURES.combat && <Pickups />}
         {FEATURES.interiors && <Interior />}

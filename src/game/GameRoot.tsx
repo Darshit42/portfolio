@@ -10,6 +10,8 @@ import InteractPrompt from "../ui/InteractPrompt";
 import CodexModal from "../ui/CodexModal";
 import ContactModal from "../ui/ContactModal";
 import SkillTreePanel from "../ui/SkillTreePanel";
+import AgentInspector from "../ui/AgentInspector";
+import LiveControl from "../ui/LiveControl";
 import DialogBox from "../ui/DialogBox";
 import InventoryPanel from "../ui/InventoryPanel";
 import FastTravel from "../ui/FastTravel";
@@ -101,6 +103,10 @@ export default function GameRoot() {
       <TimeIndicator />
       <Toasts />
       <NoticeToast />
+
+      {/* agent town (self-gates on FEATURES + store state) */}
+      {FEATURES.agentTown && <AgentInspector />}
+      {FEATURES.agentTown && <LiveControl />}
 
       {/* contextual */}
       {mode === "playing" && <InteractPrompt />}

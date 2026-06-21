@@ -9,3 +9,12 @@ dist-ssr
 *.log
 npm-debug.log*
 .vite
+
+# apps/server (python sim engine)
+__pycache__/
+*.pyc
+.venv/
+apps/server/.venv/
+apps/server/.cache/
+apps/server/*.lock
+apps/server/*.partial
