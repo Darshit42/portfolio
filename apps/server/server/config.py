@@ -54,6 +54,10 @@ class Config:
     api_key: str = os.environ.get("GEMINI_API_KEY", "").strip()
     model: str = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash-lite").strip()
     embed_model: str = os.environ.get("GEMINI_EMBED_MODEL", "gemini-embedding-001").strip()
+    # Embeddings default to a free deterministic local hash — the embedding API
+    # is the rate-limit bottleneck in a bake and real vectors are only a marginal
+    # retrieval gain for a 7-agent day. Opt in with GEMINI_REMOTE_EMBED=1.
+    remote_embeddings: bool = os.environ.get("GEMINI_REMOTE_EMBED", "").strip() in ("1", "true", "yes")
 
     # --- live-mode hard caps (R9) ---
     live_max_agents: int = _int("LIVE_MAX_AGENTS", 6)

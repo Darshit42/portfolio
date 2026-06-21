@@ -13,6 +13,7 @@ from typing import Optional
 
 from .agents import Agent, PlanSlot
 from .config import CONFIG
+from .economy import INTENTS
 from .llm import LLM
 from .world import BUILDING_BY_ID, VALID_BUILDING_IDS, Building
 
@@ -48,13 +49,24 @@ def plan_day(llm: LLM, agent: Agent, now_ms: int) -> list[PlanSlot]:
     mems = agent.memory.retrieve(f"{agent.name}'s goals and routine", now_ms)
     mem_text = "; ".join(m.text for m in mems) or "no strong memories yet"
     buildings = ", ".join(f"{b.id} ({b.label})" for b in BUILDING_BY_ID.values())
+    e = agent.econ
+    inv = ", ".join(f"{k}:{v}" for k, v in e.inventory.items()) or "empty"
+    # Economic status is the LLM's decision context (the only LLM-driven choice):
+    # given needs + coin, it picks an INTENT per slot; deterministic code executes.
     prompt = (
         f"You are {agent.name}. {agent.bio}\n"
         f"Recent memories: {mem_text}\n"
-        f"Town buildings: {buildings}\n\n"
-        "Write today's schedule as a JSON array of 4-8 objects, each "
-        '{"time": <hour 0-23>, "building": "<building id>", "description": "<short>"}. '
-        "Times strictly increasing. Use only the building ids listed. JSON only."
+        f"Your status — coin: {e.coin:.0f}, hunger: {e.hunger:.0f}/100, "
+        f"energy: {e.energy:.0f}/100, inventory: {inv}.\n"
+        f"Town buildings: {buildings}\n"
+        "Economy: work at agent-forge/finddder-market/null-pointer-tavern or your post "
+        "earns coin; buy_food and rest at null-pointer-tavern restore hunger/energy; "
+        "sell surplus goods at finddder-market.\n\n"
+        "Plan today as a JSON array of 4-8 objects, each "
+        '{"time": <hour 0-23>, "building": "<id>", "intent": '
+        '"work"|"buy_food"|"sell"|"rest"|"trade"|"visit", "description": "<short>"}. '
+        "Balance earning against hunger/energy. Times strictly increasing. "
+        "Use only the building ids listed. JSON only."
     )
     try:
         raw = llm.complete(
@@ -69,24 +81,29 @@ def plan_day(llm: LLM, agent: Agent, now_ms: int) -> list[PlanSlot]:
                     continue
                 t = int(item.get("time", 8))
                 b = _clamp_building(str(item.get("building", agent.home)), agent.home)
+                intent = str(item.get("intent", "visit")).lower()
+                if intent not in INTENTS:
+                    intent = "visit"
                 d = str(item.get("description", "tending to business"))[:80]
-                slots.append(PlanSlot(max(0, min(23, t)), b, d))
+                slots.append(PlanSlot(max(0, min(23, t)), b, d, intent))
         slots = [s for s in slots if s.building]
         if 4 <= len(slots) <= 8:
             slots.sort(key=lambda s: s.time)
             return slots
-    except Exception as e:  # noqa: BLE001
-        print(f"[plan] {agent.id} fell back: {e}")
+    except Exception as e2:  # noqa: BLE001
+        print(f"[plan] {agent.id} fell back: {e2}")
     return _default_plan(agent)
 
 
 def _default_plan(agent: Agent) -> list[PlanSlot]:
-    """Four evenly-spaced visits around the home building (R4.4)."""
-    targets = [agent.home] + _HOME_NEIGHBOURS.get(agent.home, [agent.home])[:3]
-    hours = [7, 12, 16, 20]
+    """Deterministic fallback: a sensible work/eat/sell/rest loop by role."""
+    home = agent.home
+    neigh = _HOME_NEIGHBOURS.get(home, [home])
     return [
-        PlanSlot(h, _clamp_building(b, agent.home), f"spending time at {BUILDING_BY_ID[b].label}")
-        for h, b in zip(hours, targets)
+        PlanSlot(7, home, "open the day's work", "work"),
+        PlanSlot(11, "null-pointer-tavern", "midday meal", "buy_food"),
+        PlanSlot(15, _clamp_building(neigh[0] if neigh else home, home), "afternoon trade", "sell"),
+        PlanSlot(20, "null-pointer-tavern", "rest for the evening", "rest"),
     ]
 
 

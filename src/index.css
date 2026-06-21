@@ -99,3 +99,13 @@
 .agent-bubble-in {
   animation: agentBubbleIn 180ms ease-out;
 }
+
+/* Agent Town economy flash (trade / production pop). */
+@keyframes agentFlashIn {
+  0%   { opacity: 0; transform: translateY(8px); }
+  20%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.agent-flash-in {
+  animation: agentFlashIn 1600ms ease-out forwards;
+}

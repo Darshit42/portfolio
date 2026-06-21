@@ -2,8 +2,9 @@
 
 Smallville-style autonomous agents for Devhalla. The seven town NPCs get a
 cognitive loop (memory stream → reflection → daily planning), wander the 3D
-town, use buildings, and converse. This server is **never** bundled into the web
-app; its only product the frontend consumes is a baked event log.
+town, use buildings, **act under a resource economy**, and converse. This server
+is **never** bundled into the web app; its only product the frontend consumes is
+a baked event log.
 
 ## Two modes (cost-safe by design)
 
@@ -73,6 +74,54 @@ cents). Live mode caps itself at 50k tokens / 10 min and then ends the session.
 
 > Note: a cold real bake can be slow in wall-clock time on the free Gemini tier
 > due to rate-limit backoff; the cost stays tiny and re-bakes are fast (cached).
+
+## Resource economy (deterministic, baked)
+
+Agents have **needs** (`hunger`, `energy`), **coin**, and **inventory**, and
+buildings have economic roles. This turns "agents wander and chat" into "agents
+act under resource constraints," with visible emergent behavior (a smith forging
+and selling tools, prices drifting with demand, wealth diverging by role). It all
+runs **at bake time** and serializes into the same event log — **$0 runtime,
+no new dependency.**
+
+### Deterministic vs LLM split (the cost-safe part)
+
+| Deterministic — pure math, no LLM | LLM — high-level choice only |
+|-----------------------------------|------------------------------|
+| needs decay each tick | the **daily plan**: given needs/coin/inventory, the LLM picks an *intent* per slot (`work` / `buy_food` / `sell` / `rest`) |
+| production (forge: ore → tools), consumption (tavern: food/ale → restore) | |
+| inventory + coin bookkeeping, trade settlement | |
+| **prices** from clamped supply/demand | |
+| **urgent-need override** (resolve the real blocker) | |
+
+**No per-transaction LLM calls.** The LLM sets goals once per day; deterministic
+code executes every transaction. Added cost over the base bake: only the 7
+planning prompts grow (~+2–5k tokens total).
+
+### Anti-degeneracy guards (closed loops collapse quietly)
+
+- **Price clamps** `[floor, ceil]` per item — supply/demand can't run to 0 or ∞.
+- **Wage floor** — work always pays, so no agent can get stuck broke.
+- **Override resolves the real blocker** — hungry *and* broke → **work** (earn),
+  not pace to a market it can't afford. Picks the *most* critical need so hunger
+  and energy don't starve each other.
+- **Bake summary** prints final coin/needs/inventory per agent + price ranges +
+  warnings (bankruptcy, stuck-critical needs, prices pinned to a clamp). Eyeball
+  it after every bake to see whether the economy equilibrated or collapsed.
+
+### Event-log schema (additive, v2)
+
+`meta.version` is bumped to `2`. New event types — `trade`, `produce`,
+`consume`, `price`, `stat` (a periodic per-agent snapshot powering the
+inspector) — are **purely additive**. A **version-1 log still replays**
+unchanged; the frontend treats unknown event types as no-ops and shows empty
+economy panels. `stat` events are emitted **on change** (after any transaction)
+plus a low-frequency heartbeat, so the inspector tracks the action without
+ballooning the log.
+
+The frontend replays these as: a market-prices readout, brief coin/▲ flashes on
+trades, and an **Agent Inspector** economy panel (coin, need bars, inventory,
+recent transactions).
 
 ## Graceful degradation
 

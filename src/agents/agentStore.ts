@@ -10,16 +10,26 @@ export interface Bubble {
   key: number; // unique per utterance, for React keys + fade restart
 }
 
+/** Transient economy pop above an agent (a trade or production). */
+export interface Flash {
+  agentId: string;
+  text: string;
+  tone: "gain" | "spend" | "make";
+  key: number;
+}
+
 export type LiveStatus = "off" | "connecting" | "live" | "fallback";
 
 interface AgentUiState {
   ready: boolean; // baked log loaded + replaying
   bubbles: Bubble[];
+  flashes: Flash[];
   inspectorId: string | null;
   live: { status: LiveStatus; tokensRemaining: number | null };
 
   setReady: (v: boolean) => void;
   setBubbles: (b: Bubble[]) => void;
+  setFlashes: (f: Flash[]) => void;
   openInspector: (id: string) => void;
   closeInspector: () => void;
   setLive: (status: LiveStatus, tokensRemaining?: number | null) => void;
@@ -28,11 +38,13 @@ interface AgentUiState {
 export const useAgentStore = create<AgentUiState>((set) => ({
   ready: false,
   bubbles: [],
+  flashes: [],
   inspectorId: null,
   live: { status: "off", tokensRemaining: null },
 
   setReady: (v) => set({ ready: v }),
   setBubbles: (bubbles) => set({ bubbles }),
+  setFlashes: (flashes) => set({ flashes }),
   openInspector: (id) => set({ inspectorId: id }),
   closeInspector: () => set({ inspectorId: null }),
   setLive: (status, tokensRemaining = null) => set({ live: { status, tokensRemaining } }),

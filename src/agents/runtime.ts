@@ -9,12 +9,21 @@
  */
 import { makeRigCtrl, type RigCtrl } from "../game/CharacterRig";
 import { WORLD_CENTER, WORLD_RADIUS } from "../data/buildings";
-import { useAgentStore, type Bubble } from "./agentStore";
-import type { MemoryLine, SimDocument, SimMeta, WorldEvent } from "./types";
+import { useAgentStore, type Bubble, type Flash } from "./agentStore";
+import type {
+  EconSnapshot,
+  MemoryLine,
+  SimDocument,
+  SimMeta,
+  TradeEvent,
+  TxnLine,
+  WorldEvent,
+} from "./types";
 
 const CAMERA_HEADING = Math.atan2(15, 18);
 const ARRIVE_EPS = 0.5;
 const BUBBLE_MS = 4000; // 4s on screen (R11.4)
+const FLASH_MS = 1600; // economy pop dwell
 
 interface LiveAgent {
   id: string;
@@ -51,6 +60,9 @@ class AgentTownRuntime {
   private bubbles: { b: Bubble; expiry: number }[] = [];
   private bubblesDirty = false;
   private bubbleKey = 0;
+  private flashes: { f: Flash; expiry: number }[] = [];
+  private flashesDirty = false;
+  private flashKey = 0;
   private liveMode = false; // when true, freeze baked replay and only play streamed events
 
   setLiveMode(on: boolean): void {
@@ -126,13 +138,33 @@ class AgentTownRuntime {
 
     this.integrate(dt);
     this.expireBubbles();
+    this.expireFlashes();
     if (this.bubblesDirty) {
       useAgentStore.getState().setBubbles(this.bubbles.map((x) => x.b));
       this.bubblesDirty = false;
     }
+    if (this.flashesDirty) {
+      useAgentStore.getState().setFlashes(this.flashes.map((x) => x.f));
+      this.flashesDirty = false;
+    }
   }
 
   private dispatch(ev: WorldEvent): void {
+    // Economy events are mostly derived by scanning (inspector + market
+    // readout); here we only fire transient visuals. price/stat carry no live
+    // action. Unknown future types simply fall through as no-ops (forward-safe).
+    switch (ev.type) {
+      case "price":
+      case "stat":
+      case "consume":
+        return;
+      case "trade":
+        this.addFlash(ev);
+        return;
+      case "produce":
+        this.addFlash2(ev.agentId, `+${ev.made.qty} ${ev.made.item}`, "make");
+        return;
+    }
     const a = this.agents.get(ev.agentId);
     if (!a) return;
     switch (ev.type) {
@@ -198,6 +230,28 @@ class AgentTownRuntime {
     if (this.bubbles.length !== before) this.bubblesDirty = true;
   }
 
+  // ----------------------------------------------------------------- flashes
+  private addFlash(ev: TradeEvent): void {
+    // Show the coin side of the trade, signed by whether the agent gained it.
+    const gainsCoin = "coin" in ev.get;
+    const amt = "coin" in ev.get ? ev.get.coin : "coin" in ev.give ? ev.give.coin : 0;
+    this.addFlash2(ev.agentId, `${gainsCoin ? "+" : "-"}${Math.round(amt)}c`, gainsCoin ? "gain" : "spend");
+  }
+
+  private addFlash2(agentId: string, text: string, tone: Flash["tone"]): void {
+    const f: Flash = { agentId, text, tone, key: ++this.flashKey };
+    this.flashes = this.flashes.filter((x) => x.f.agentId !== agentId);
+    this.flashes.push({ f, expiry: performance.now() + FLASH_MS });
+    this.flashesDirty = true;
+  }
+
+  private expireFlashes(): void {
+    const now = performance.now();
+    const before = this.flashes.length;
+    this.flashes = this.flashes.filter((x) => x.expiry > now);
+    if (this.flashes.length !== before) this.flashesDirty = true;
+  }
+
   // -------------------------------------------------------------- inspector
   /** Derive the inspector view for an agent from the snapshot + replayed events
    *  up to the current clock (time-accurate memory feed, R12.1). */
@@ -205,24 +259,75 @@ class AgentTownRuntime {
     snapshot: SimMeta["agents"][number];
     activity: string;
     memories: MemoryLine[];
+    econ: EconSnapshot;
+    transactions: TxnLine[];
   } | null {
     if (!this.meta) return null;
     const snap = this.meta.agents.find((x) => x.id === id);
     const a = this.agents.get(id);
     if (!snap || !a) return null;
     const lines: MemoryLine[] = [];
+    const txns: TxnLine[] = [];
+    // Latest stat snapshot ≤ clock (fallback to the meta baseline).
+    let econ: EconSnapshot = snap.econ ?? { coin: 0, needs: {}, inventory: {} };
     for (const ev of this.events) {
       if (ev.ts > this.clockMs) break;
       if (ev.agentId !== id) continue;
-      if (ev.type === "speak") lines.push({ ts: ev.ts, kind: "said", text: ev.text });
-      else if (ev.type === "activity") lines.push({ ts: ev.ts, kind: "did", text: ev.description });
-      else if (ev.type === "arrive")
-        lines.push({ ts: ev.ts, kind: "moved", text: `arrived at ${labelOf(ev.building)}` });
-      else if (ev.type === "reflect")
-        lines.push({ ts: ev.ts, kind: "reflected", text: ev.summary });
+      switch (ev.type) {
+        case "speak":
+          lines.push({ ts: ev.ts, kind: "said", text: ev.text });
+          break;
+        case "activity":
+          lines.push({ ts: ev.ts, kind: "did", text: ev.description });
+          break;
+        case "arrive":
+          lines.push({ ts: ev.ts, kind: "moved", text: `arrived at ${labelOf(ev.building)}` });
+          break;
+        case "reflect":
+          lines.push({ ts: ev.ts, kind: "reflected", text: ev.summary });
+          break;
+        case "stat":
+          econ = { coin: ev.coin, needs: ev.needs, inventory: ev.inventory };
+          break;
+        case "trade":
+          txns.push({ ts: ev.ts, kind: "trade", text: tradeText(ev) });
+          break;
+        case "produce":
+          txns.push({ ts: ev.ts, kind: "produce", text: `forged ${ev.made.qty} ${ev.made.item}` });
+          break;
+        case "consume":
+          txns.push({
+            ts: ev.ts,
+            kind: "consume",
+            text: `used ${ev.qty} ${ev.item} (+${Math.round(ev.restored)} ${ev.need})`,
+          });
+          break;
+      }
     }
-    return { snapshot: snap, activity: a.activity, memories: lines.slice(-10).reverse() };
+    return {
+      snapshot: snap,
+      activity: a.activity,
+      memories: lines.slice(-10).reverse(),
+      econ,
+      transactions: txns.slice(-8).reverse(),
+    };
   }
+
+  /** Latest market price per item ≤ clock (for the prices readout). */
+  marketPrices(): Record<string, number> {
+    const prices: Record<string, number> = {};
+    for (const ev of this.events) {
+      if (ev.ts > this.clockMs) break;
+      if (ev.type === "price") prices[ev.item] = ev.price;
+    }
+    return prices;
+  }
+}
+
+function tradeText(ev: TradeEvent): string {
+  const side = (s: TradeEvent["give"]) =>
+    "coin" in s ? `${Math.round(s.coin)}c` : `${s.qty} ${s.item}`;
+  return `${side(ev.give)} → ${side(ev.get)}`;
 }
 
 function labelOf(buildingId: string): string {

@@ -9,6 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
+from .economy import Econ, starting_econ
 from .llm import LLM
 from .memory import MemoryStream
 from .world import BUILDING_BY_ID, AgentSeed
@@ -19,9 +20,11 @@ class PlanSlot:
     time: int  # simulated hour 0..23
     building: str
     description: str
+    intent: str = "visit"  # economic intent (work/buy_food/sell/rest/trade/visit)
 
     def as_dict(self) -> dict:
-        return {"time": self.time, "building": self.building, "description": self.description}
+        return {"time": self.time, "building": self.building,
+                "description": self.description, "intent": self.intent}
 
 
 class Agent:
@@ -33,6 +36,7 @@ class Agent:
         self.relationships = dict(seed.relationships)
         self.memory = MemoryStream(llm)
         self.plan: list[PlanSlot] = []
+        self.econ: Econ = starting_econ(seed.home)  # coin / needs / inventory
         self.activity = "arriving in town"
         # Start at the home building's standing point.
         home = BUILDING_BY_ID[seed.home]
@@ -64,6 +68,7 @@ class Agent:
             "plan": [s.as_dict() for s in self.plan],
             "position": [self.position[0], self.position[1]],
             "activity": self.activity,
+            "econ": self.econ.snapshot(),  # initial coin/needs/inventory baseline
         }
 
 

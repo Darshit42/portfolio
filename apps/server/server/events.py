@@ -16,7 +16,12 @@ import json
 from pathlib import Path
 from typing import Any, Iterable
 
-EVENT_TYPES = {"move", "speak", "arrive", "reflect", "activity"}
+# Core events (log version 1) + economy events (version 2, additive). Old
+# version-1 logs replay unchanged; frontends treat unknown types as no-ops.
+EVENT_TYPES = {
+    "move", "speak", "arrive", "reflect", "activity",
+    "trade", "produce", "consume", "price", "stat",
+}
 
 # Required fields per type, beyond the common (type, agentId, ts).
 _REQUIRED: dict[str, tuple[str, ...]] = {
@@ -25,6 +30,12 @@ _REQUIRED: dict[str, tuple[str, ...]] = {
     "arrive": ("building", "pos"),
     "activity": ("building", "description"),
     "reflect": ("summary",),
+    # --- economy (v2) ---
+    "trade": ("withId", "give", "get"),
+    "produce": ("building", "made"),
+    "consume": ("item", "qty", "need", "restored"),
+    "price": ("item", "price"),
+    "stat": ("coin", "needs", "inventory"),
 }
 
 

@@ -61,9 +61,16 @@ class MemoryStream:
         type: MemoryType,
         text: str,
         importance: int = 5,
-        embed: bool = True,
+        embed: Optional[bool] = None,
     ) -> Memory:
         m = Memory(t=t, type=type, text=text, importance=max(1, min(10, importance)))
+        # Embedding is the most rate-limited call in a bake, so only embed
+        # memories likely to be *retrieved* by relevance: observations,
+        # reflections, plans, and anything important. Low-value action chatter
+        # (arrivals, routine trades) is still rankable by recency + importance
+        # and feeds reflection via recent(), so it never needs a vector.
+        if embed is None:
+            embed = type != "action" or m.importance >= 5
         if embed:
             m.embedding = self._llm.embed(text)
         self.entries.append(m)

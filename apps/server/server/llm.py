@@ -117,8 +117,9 @@ class LLM:
 
     # ------------------------------------------------------------- embeddings
     def embed(self, text: str) -> list[float]:
-        if self.offline:
-            # Deterministic stub — don't cache (would poison real embeddings).
+        if self.offline or not CONFIG.remote_embeddings:
+            # Deterministic local hash (free, no rate limits). Not cached — it's
+            # cheap to recompute and caching it would poison a remote-embed run.
             return _offline_embedding(text)
         cached = CACHE.get_embedding(CONFIG.embed_model, text)
         if cached is not None:

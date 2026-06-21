@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useAgentStore } from "../agents/agentStore";
 import { runtime } from "../agents/runtime";
 import { FEATURES } from "../data/config";
+import { itemMeta, needMeta } from "../data/economy";
 import { CloseIcon } from "./icons";
-import type { MemoryLine } from "../agents/types";
+import type { EconSnapshot, MemoryLine, TxnLine } from "../agents/types";
 
 /**
  * Agent Inspector (R12) — a right-docked panel showing one agent's mind: bio,
@@ -35,7 +36,7 @@ export default function AgentInspector() {
   }, [id, close]);
 
   if (!id || !data) return null;
-  const { snapshot, activity, memories } = data;
+  const { snapshot, activity, memories, econ, transactions } = data;
   const nameOf = (aid: string) =>
     runtime.meta?.agents.find((a) => a.id === aid)?.name ?? aid;
 
@@ -64,6 +65,8 @@ export default function AgentInspector() {
         <Section label="Now">
           <p className="leading-snug text-realm-text">{activity || "—"}</p>
         </Section>
+
+        <EconomyPanel econ={econ} transactions={transactions} />
 
         <Section label="Today's plan">
           <ul className="space-y-1">
@@ -118,6 +121,77 @@ function Section({ label, children }: { label: string; children: React.ReactNode
     </section>
   );
 }
+
+function EconomyPanel({ econ, transactions }: { econ: EconSnapshot; transactions: TxnLine[] }) {
+  const inv = Object.entries(econ.inventory).filter(([, q]) => q > 0);
+  return (
+    <Section label="Economy">
+      <div className="space-y-2">
+        {/* coin */}
+        <div className="flex items-center gap-2">
+          <span className="text-realm-muted">Coin</span>
+          <span className="font-mono font-semibold text-realm-gold">{Math.round(econ.coin)}c</span>
+        </div>
+
+        {/* needs as bars */}
+        <div className="space-y-1">
+          {Object.entries(econ.needs).map(([id, v]) => {
+            const m = needMeta(id);
+            return (
+              <div key={id} className="flex items-center gap-2">
+                <span className="w-14 text-[12px] text-realm-muted">{m.label}</span>
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${Math.max(0, Math.min(100, v))}%`, background: m.color }}
+                  />
+                </div>
+                <span className="w-7 text-right font-mono text-[11px] text-realm-muted">{Math.round(v)}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* inventory */}
+        <div className="flex flex-wrap gap-1.5">
+          {inv.length === 0 ? (
+            <span className="text-[12px] text-realm-muted">empty pack</span>
+          ) : (
+            inv.map(([item, qty]) => {
+              const m = itemMeta(item);
+              return (
+                <span
+                  key={item}
+                  className="rounded-md border border-realm-edge px-1.5 py-0.5 text-[12px]"
+                  title={m.label}
+                >
+                  {m.icon} {m.label} ×{qty}
+                </span>
+              );
+            })
+          )}
+        </div>
+
+        {/* recent transactions */}
+        {transactions.length > 0 && (
+          <ul className="space-y-0.5 pt-0.5">
+            {transactions.map((t, i) => (
+              <li key={i} className="font-mono text-[11px] text-realm-muted">
+                <span style={{ color: TXN_COLOR[t.kind] }}>{t.kind}</span> {t.text}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Section>
+  );
+}
+
+const TXN_COLOR: Record<TxnLine["kind"], string> = {
+  trade: "#39d98a",
+  produce: "#ff9a4c",
+  consume: "#6ad0ff",
+};
 
 const KIND_COLOR: Record<MemoryLine["kind"], string> = {
   said: "#6ad0ff",

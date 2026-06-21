@@ -26,6 +26,12 @@ PARTIAL = OUT.with_suffix(".partial")
 
 
 def main(argv: list[str] | None = None) -> int:
+    # The summary prints a few non-cp1252 glyphs; force UTF-8 so a Windows
+    # console doesn't crash on them after a successful bake.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]
+    except Exception:
+        pass
     ap = argparse.ArgumentParser(prog="server bake", description="Bake the Agent Town replay log.")
     ap.add_argument("--offline", action="store_true",
                     help="deterministic templated bake, zero API calls")
@@ -77,7 +83,27 @@ def main(argv: list[str] | None = None) -> int:
         f"  wall time    : {round(time.time() - started, 1)}s\n"
         f"  -> {OUT.relative_to(Path.cwd()) if OUT.is_relative_to(Path.cwd()) else OUT}"
     )
+    _print_economy_summary(sim.economy_summary())
     return 0
+
+
+def _print_economy_summary(s: dict) -> None:
+    """Eyeball whether the economy reached a sensible equilibrium (R: reviewer)."""
+    print("\neconomy — end of day")
+    print(f"  {'agent':<20}{'coin':>7}{'hunger':>8}{'energy':>8}  inventory")
+    for a in s["agents"]:
+        inv = ", ".join(f"{k}:{v}" for k, v in a["inventory"].items()) or "—"
+        print(f"  {a['name']:<20}{a['coin']:>7.0f}{a['hunger']:>8.0f}{a['energy']:>8.0f}  {inv}")
+    print("  prices (low..high, final):")
+    for item, p in s["prices"].items():
+        print(f"    {item:<8} {p['low']:>5.1f} .. {p['high']:>5.1f}   now {p['final']:>5.1f}"
+              f"   [{p['floor']}..{p['ceil']}]")
+    if s["warnings"]:
+        print("  ⚠ warnings:")
+        for w in dict.fromkeys(s["warnings"]):  # de-dup, preserve order
+            print(f"    - {w}")
+    else:
+        print("  ✓ no degenerate conditions detected")
 
 
 def log_cache_stats() -> str:

@@ -88,6 +88,7 @@ function AgentFigure({ id, register }: { id: string; register: (g: Group | null)
   const ctrl = runtime.ctrlOf(id)!;
   const accent = markerAccent(id);
   const bubble = useAgentStore((s) => s.bubbles.find((b) => b.agentId === id));
+  const flash = useAgentStore((s) => s.flashes.find((f) => f.agentId === id));
 
   useFrame((state) => {
     if (marker.current && !reduced) {
@@ -138,6 +139,25 @@ function AgentFigure({ id, register }: { id: string; register: (g: Group | null)
               {bubble.name}
             </div>
             {bubble.text}
+          </div>
+        </Html>
+      )}
+
+      {/* economy flash (trade / production) */}
+      {flash && (
+        <Html position={[0.6, 2.4, 0]} center distanceFactor={24} pointerEvents="none" zIndexRange={[19, 0]}>
+          <div
+            key={flash.key}
+            className={reduced ? "" : "agent-flash-in"}
+            style={{
+              whiteSpace: "nowrap",
+              fontWeight: 800,
+              fontSize: 13,
+              color: flash.tone === "gain" ? "#39d98a" : flash.tone === "spend" ? "#ff7a7a" : "#ffb066",
+              textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+            }}
+          >
+            {flash.text}
           </div>
         </Html>
       )}
