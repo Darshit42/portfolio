@@ -138,6 +138,51 @@ export const PROJECTS: Project[] = [
     ],
     accent: "#f2b94c",
   },
+  {
+    id: "multi-agent-rag",
+    name: "Multi-Agent RAG",
+    tier: "research",
+    category: "ai-agents",
+    oneLiner: "A multi-agent FastAPI FAQ system over Google Generative AI.",
+    blurb:
+      "A FastAPI-based FAQ system that automates question answering with Google Generative AI. A multi-agent architecture coordinates document-management endpoints for query processing and response generation, retrieving over a managed corpus before composing an answer.",
+    stack: ["FastAPI", "Google Generative AI", "Python", "RAG"],
+    links: [
+      // TODO(launch): point at the real repo once public.
+      { label: "GitHub", url: "https://github.com/Darshit42", kind: "github", unverified: true },
+    ],
+    accent: "#ffb347",
+  },
+  {
+    id: "openenv-sre",
+    name: "OpenEnv — Causal SRE Platform",
+    tier: "production",
+    category: "systems-infra",
+    oneLiner: "RL simulation platform for autonomous SRE incident response.",
+    blurb:
+      "A production-grade reinforcement-learning simulation platform for autonomous SRE incident response, modeling microservice architectures with realistic anomaly injection. A hybrid ML pipeline — XGBoost (485-feature root-cause classification), Isolation Forest, and an LSTM autoencoder — feeds a causal reasoning engine (PC-algorithm DAG discovery + an SEM counterfactual engine) for safe 'what-if' intervention, with SHAP explainability.",
+    stack: ["FastAPI", "React", "Docker", "XGBoost", "PyTorch", "SHAP"],
+    links: [
+      // TODO(launch): point at the real repo once public.
+      { label: "GitHub", url: "https://github.com/Darshit42", kind: "github", unverified: true },
+    ],
+    accent: "#5ad1c4",
+  },
+  {
+    id: "btc-range-predictor",
+    name: "BTC Price-Range Predictor",
+    tier: "research",
+    category: "products-data",
+    oneLiner: "95% next-hour BTC price-range forecasts via Monte Carlo.",
+    blurb:
+      "A GBM model forecasting the 95% BTC/USDT confidence interval via Monte Carlo (10k paths, Student-t log-returns) — 95.28% coverage on a 30-day backtest. It benchmarks three volatility models (Simple σ, EWM, HAR-RV), tunes hyperparameters by Winkler score, and ships a live Binance feed with SQLite persistence behind an interactive Streamlit + Plotly dashboard.",
+    stack: ["Python", "Streamlit", "Plotly", "Monte Carlo", "SQLite", "Binance API"],
+    links: [
+      // TODO(launch): point at the real repo once public.
+      { label: "GitHub", url: "https://github.com/Darshit42", kind: "github", unverified: true },
+    ],
+    accent: "#e8b04a",
+  },
 ];
 
 /** Lookup helpers (cheap; arrays are tiny). */
