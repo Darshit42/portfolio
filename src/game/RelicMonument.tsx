@@ -7,25 +7,25 @@ import { MAT } from "./materials";
 import { useNear } from "./useNear";
 
 /**
- * A relic shrine (PRD-art §7): stone pedestal, a floating spinning gem, a soft
- * emissive ring on the ground, and an accent point light that only exists
+ * A guild sigil-shrine (PRD-art §7): stone pedestal, a floating spinning gem, a
+ * soft emissive ring on the ground, and an accent point light that only exists
  * while the player is nearby (so the global light budget holds — at most a
- * couple are ever active). Collected relics dim to a faint glow. The name
- * label fades in within ~13 units (§8).
+ * couple are ever active). Once the guild's sigil is earned it dims to a faint
+ * glow. The guild name label fades in within ~13 units (§8).
  */
 export default function RelicMonument({
   position,
   accent,
-  projectId,
+  categoryId,
   label,
 }: {
   position: [number, number];
   accent: string;
-  projectId: string;
+  categoryId: string;
   label: string;
 }) {
-  const found = useGameStore((s) => s.foundRelics.has(projectId));
-  const near = useGameStore((s) => s.nearby?.projectId === projectId);
+  const found = useGameStore((s) => s.sigils.has(categoryId));
+  const near = useGameStore((s) => s.nearby?.categoryId === categoryId);
   const reduced = useGameStore((s) => s.reducedMotion);
   const nearLabel = useNear(position[0], position[1], 13);
 

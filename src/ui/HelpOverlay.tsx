@@ -1,5 +1,5 @@
 import { FEATURES, WORLD_NAME } from "../data/config";
-import { TOTAL_RELICS } from "../data/projects";
+import { TOTAL_SIGILS } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import Modal from "./Modal";
 
@@ -23,7 +23,7 @@ export default function HelpOverlay({ touch }: { touch: boolean }) {
       ]
     : [
         ["Move", "W A S D or arrow keys"],
-        ["Inspect", "E or Enter near a relic"],
+        ["Inspect", "E or Enter at a guild"],
         ...(FEATURES.combat ? ([["Attack", "Space — swat the bugs"]] as [string, string][]) : []),
         ...(FEATURES.combat ? ([["Inventory", "I or B"]] as [string, string][]) : []),
         ["Fast travel", "M"],
@@ -35,8 +35,8 @@ export default function HelpOverlay({ touch }: { touch: boolean }) {
     <Modal title="How to play" subtitle={WORLD_NAME} onClose={toggleHelp} maxWidth="max-w-lg">
       <div className="flex flex-col gap-5">
         <p className="text-sm leading-relaxed text-realm-muted">
-          Walk the realm and inspect each glowing building to uncover its project. Gather all{" "}
-          {TOTAL_RELICS} relics to open the Gate of Contact to the south.
+          Walk the realm and step into each glowing guild to browse its projects and claim its sigil. Earn all{" "}
+          {TOTAL_SIGILS} guild sigils to open the Gate of Contact to the south.
         </p>
 
         <dl className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">

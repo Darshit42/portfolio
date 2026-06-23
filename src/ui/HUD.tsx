@@ -1,18 +1,18 @@
-import { PROJECTS, TOTAL_RELICS } from "../data/projects";
+import { CATEGORIES, TOTAL_SIGILS } from "../data/categories";
 import { questHint } from "../data/quests";
 import { FEATURES } from "../data/config";
 import { ARENA_WAVES, useGameStore } from "../store/useGameStore";
 import { RelicIcon } from "./icons";
 
-/** Relic tracker + main-quest hint (F7) + health/arena (combat). Top-left. */
+/** Sigil tracker + main-quest hint (F7) + health/arena (combat). Top-left. */
 export default function HUD() {
-  const found = useGameStore((s) => s.foundRelics);
+  const sigils = useGameStore((s) => s.sigils);
   const health = useGameStore((s) => s.health);
   const maxHealth = useGameStore((s) => s.maxHealth);
   const arenaActive = useGameStore((s) => s.arenaActive);
   const arenaWave = useGameStore((s) => s.arenaWave);
   const coins = useGameStore((s) => s.coins);
-  const n = found.size;
+  const n = sigils.size;
 
   return (
     <div className="pointer-events-none absolute left-4 top-4 z-20 flex flex-col gap-2 animate-fade-in">
@@ -20,16 +20,16 @@ export default function HUD() {
         <div className="flex items-center gap-2 text-realm-gold">
           <RelicIcon width={18} height={18} />
           <span className="font-display text-sm font-semibold">
-            {n} / {TOTAL_RELICS} relics
+            {n} / {TOTAL_SIGILS} sigils
           </span>
         </div>
         <div className="mt-2 flex gap-1.5">
-          {PROJECTS.map((p) => (
+          {CATEGORIES.map((c) => (
             <span
-              key={p.id}
-              title={p.name}
+              key={c.id}
+              title={c.guildName}
               className="h-1.5 w-5 rounded-full transition-colors"
-              style={{ background: found.has(p.id) ? p.accent : "rgba(255,255,255,0.12)" }}
+              style={{ background: sigils.has(c.id) ? c.accent : "rgba(255,255,255,0.12)" }}
             />
           ))}
         </div>

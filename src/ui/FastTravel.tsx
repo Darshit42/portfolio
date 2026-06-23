@@ -1,5 +1,5 @@
 import { BUILDINGS } from "../data/buildings";
-import { projectByBuilding } from "../data/projects";
+import { categoryByBuilding } from "../data/categories";
 import { selectGateOpen, useGameStore } from "../store/useGameStore";
 import Modal from "./Modal";
 
@@ -7,23 +7,24 @@ import Modal from "./Modal";
 export default function FastTravel() {
   const close = useGameStore((s) => s.closeOverlay);
   const requestTravel = useGameStore((s) => s.requestTravel);
-  const found = useGameStore((s) => s.foundRelics);
+  const sigils = useGameStore((s) => s.sigils);
   const gateOpen = useGameStore(selectGateOpen);
 
   return (
     <Modal title="Fast Travel" subtitle="Jump anywhere in the realm" accent="#6ad0ff" onClose={close} maxWidth="max-w-lg">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {BUILDINGS.map((b) => {
-          const project = projectByBuilding(b.id);
-          const claimed = project ? found.has(project.id) : false;
+          const category = categoryByBuilding(b.id);
+          const claimed = category ? sigils.has(category.id) : false;
           const locked = b.kind === "gate" && !gateOpen;
-          const sub = project
-            ? project.oneLiner
+          const sub = category
+            ? category.tagline
             : b.kind === "gate"
               ? gateOpen
                 ? "Open — reach out"
-                : "Locked until 6/6"
+                : "Locked until every sigil"
               : "Hub & spawn point";
+          const title = category ? category.guildName : b.label;
           return (
             <button
               key={b.id}
@@ -37,7 +38,7 @@ export default function FastTravel() {
                 {claimed ? "✓" : locked ? "🔒" : "›"}
               </span>
               <span className="min-w-0">
-                <span className="block truncate font-display text-sm font-semibold text-realm-text">{b.label}</span>
+                <span className="block truncate font-display text-sm font-semibold text-realm-text">{title}</span>
                 <span className="block truncate text-xs text-realm-muted">{sub}</span>
               </span>
             </button>

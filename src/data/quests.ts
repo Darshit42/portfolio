@@ -1,34 +1,34 @@
 /**
- * The single main quest. Scope contract: one "collect the relics" arc, no
- * branching chains. Hints are picked by remaining relics, not a state machine.
+ * The single main quest. Scope contract: one "earn every guild sigil" arc, no
+ * branching chains. Hints are picked by remaining sigils, not a state machine.
  */
 
-import { TOTAL_RELICS } from "./projects";
+import { TOTAL_SIGILS } from "./categories";
 
 export interface MainQuest {
   id: string;
   title: string;
   intro: string;
-  /** Shown when all relics are found and the Gate is open. */
+  /** Shown when every sigil is earned and the Gate is open. */
   complete: string;
 }
 
 export const MAIN_QUEST: MainQuest = {
-  id: "gather-the-relics",
-  title: "Gather the Relics",
+  id: "earn-the-sigils",
+  title: "Earn the Guild Sigils",
   intro:
-    "Six relics are bound in the buildings of Devhalla. Find each one to learn the legend it holds — and open the Gate of Contact.",
+    "Each guild of Devhalla guards a sigil. Prove yourself at every one — inspect the works it enshrines — to open the Gate of Contact.",
   complete:
-    "Every relic is yours. The Gate of Contact stands open to the south.",
+    "Every sigil is yours. The Gate of Contact stands open to the south.",
 };
 
-/** Contextual quest hint for the HUD, given how many relics are found. */
-export function questHint(found: number): string {
-  if (found === 0) return "Walk to a glowing building and inspect its relic.";
-  if (found >= TOTAL_RELICS)
+/** Contextual quest hint for the HUD, given how many sigils are earned. */
+export function questHint(earned: number): string {
+  if (earned === 0) return "Walk to a glowing guild and step inside to claim its sigil.";
+  if (earned >= TOTAL_SIGILS)
     return "The Gate of Contact is open — head south to reach out.";
-  const left = TOTAL_RELICS - found;
-  return `${found}/${TOTAL_RELICS} relics gathered · ${left} to go.`;
+  const left = TOTAL_SIGILS - earned;
+  return `${earned}/${TOTAL_SIGILS} sigils earned · ${left} to go.`;
 }
 
 /** Hidden delights (F25). Interacting shows the notice — nothing more. */

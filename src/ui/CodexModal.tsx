@@ -1,28 +1,33 @@
 import { projectById } from "../data/projects";
+import { categoryById } from "../data/categories";
 import { FEATURES } from "../data/config";
 import { useGameStore } from "../store/useGameStore";
 import Modal from "./Modal";
 import ForgeDemo from "./ForgeDemo";
 import { ProjectLinks, StackTags, TierBadge } from "./common";
 import { useTts } from "./tts";
-import { VolumeIcon, MuteIcon, SwordIcon } from "./icons";
+import { VolumeIcon, MuteIcon, SwordIcon, ArrowRightIcon } from "./icons";
 
-/** Per-project Codex panel (F6). The flagship also embeds the live Forge demo. */
+/** Per-project Codex panel (F6). The flagship also embeds the live Forge demo.
+ *  Reached from a guild list (with a "back" affordance) or straight from an NPC. */
 export default function CodexModal() {
   const id = useGameStore((s) => s.activeCodex);
   const activeForge = useGameStore((s) => s.activeForge);
+  const guildId = useGameStore((s) => s.activeGuild);
   const close = useGameStore((s) => s.closeOverlay);
+  const backToGuild = useGameStore((s) => s.backToGuild);
 
   const startArena = useGameStore((s) => s.startArena);
   const tts = useTts();
   const project = id ? projectById(id) : undefined;
+  const guild = guildId ? categoryById(guildId) : undefined;
   if (!project) return null;
 
-  const canEnterArena = FEATURES.combat && project.building === "the-arena";
+  const canEnterArena = FEATURES.combat && project.arena === true;
 
   const showForge = activeForge || project.demo?.type === "forge-live";
-  // The Oracle speaks (F21): the voice-agent project can read its blurb aloud.
-  const oracleSpeaks = FEATURES.tts && tts.supported && project.building === "oracles-booth";
+  // The Oracle speaks (F21): a project flagged `speaks` can read its blurb aloud.
+  const oracleSpeaks = FEATURES.tts && tts.supported && project.speaks === true;
 
   return (
     <Modal
@@ -38,6 +43,16 @@ export default function CodexModal() {
       }
     >
       <div className="flex flex-col gap-4">
+        {guild && (
+          <button
+            onClick={backToGuild}
+            className="-mt-1 flex w-fit items-center gap-1.5 text-xs font-semibold text-realm-muted transition hover:text-realm-gold"
+          >
+            <ArrowRightIcon width={14} height={14} className="rotate-180" />
+            {guild.guildName}
+          </button>
+        )}
+
         {showForge && (
           <div>
             <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-realm-muted">

@@ -16,7 +16,7 @@ export default function InteractPrompt() {
     <div className="pointer-events-none absolute bottom-7 left-1/2 z-20 -translate-x-1/2 animate-fade-in">
       {gateLocked ? (
         <div className="panel rounded-full px-4 py-2 text-sm text-realm-muted">
-          🔒 Gather all 6 relics to open the Gate
+          🔒 Earn every guild sigil to open the Gate
         </div>
       ) : (
         <button onClick={trigger} className="btn-primary pointer-events-auto rounded-full px-5 py-2.5 shadow-glow shadow-realm-gold/40">

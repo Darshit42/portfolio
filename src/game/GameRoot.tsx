@@ -8,6 +8,7 @@ import HUD from "../ui/HUD";
 import TopBar from "../ui/TopBar";
 import InteractPrompt from "../ui/InteractPrompt";
 import CodexModal from "../ui/CodexModal";
+import CodexListModal from "../ui/CodexListModal";
 import ContactModal from "../ui/ContactModal";
 import SkillTreePanel from "../ui/SkillTreePanel";
 import AgentInspector from "../ui/AgentInspector";
@@ -38,6 +39,8 @@ export default function GameRoot() {
   const mode = useGameStore((s) => s.mode);
   const activeGate = useGameStore((s) => s.activeGate);
   const activeSkills = useGameStore((s) => s.activeSkills);
+  const activeCodex = useGameStore((s) => s.activeCodex);
+  const activeGuild = useGameStore((s) => s.activeGuild);
   const touch = useMemo(() => isTouchDevice(), []);
 
   // Stable handlers — read fresh state via getState so the effect never re-binds.
@@ -117,7 +120,16 @@ export default function GameRoot() {
       <ControlsHint touch={touch} />
 
       {/* overlays */}
-      {mode === "codex" && (activeGate ? <ContactModal /> : activeSkills ? <SkillTreePanel /> : <CodexModal />)}
+      {mode === "codex" &&
+        (activeGate ? (
+          <ContactModal />
+        ) : activeSkills ? (
+          <SkillTreePanel />
+        ) : activeCodex ? (
+          <CodexModal />
+        ) : activeGuild ? (
+          <CodexListModal />
+        ) : null)}
       {mode === "dialog" && <DialogBox />}
       {mode === "inventory" && <InventoryPanel />}
       {mode === "fasttravel" && <FastTravel />}

@@ -2,6 +2,7 @@ import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { BUILDINGS } from "../data/buildings";
+import { categoryByBuilding } from "../data/categories";
 import { NPCS } from "../data/npcs";
 import { DOORS } from "../data/interiors";
 import { SECRETS } from "../data/quests";
@@ -37,23 +38,21 @@ export default function Player() {
 
   // Precompute interaction points from data (relics, the forge, the gate, NPCs).
   const interactables = useMemo<InteractPoint[]>(() => {
-    const fromBuildings: InteractPoint[] = BUILDINGS.filter(
-      (b) => b.projectId || b.kind === "gate" || b.kind === "shrine",
-    ).map((b) => {
-      const kind =
-        b.kind === "forge" ? "forge" : b.kind === "gate" ? "gate" : b.kind === "shrine" ? "skilltree" : "relic";
-      const prompt =
-        kind === "forge"
-          ? "Ignite the Forge"
-          : kind === "gate"
-            ? "Approach the Gate"
-            : kind === "skilltree"
-              ? "Read the Skill Shrine"
-              : "Inspect relic";
-      return {
-        point: b.approach,
-        data: { kind, id: b.id, label: b.label, prompt, projectId: b.projectId },
-      };
+    const fromBuildings: InteractPoint[] = BUILDINGS.flatMap((b) => {
+      const cat = categoryByBuilding(b.id);
+      if (cat) {
+        return [{
+          point: b.approach,
+          data: { kind: "guild", id: b.id, label: cat.guildName, prompt: `Enter ${cat.guildName}`, categoryId: cat.id } as Interactable,
+        }];
+      }
+      if (b.kind === "gate") {
+        return [{ point: b.approach, data: { kind: "gate", id: b.id, label: b.label, prompt: "Approach the Gate" } as Interactable }];
+      }
+      if (b.kind === "shrine") {
+        return [{ point: b.approach, data: { kind: "skilltree", id: b.id, label: b.label, prompt: "Read the Skill Shrine" } as Interactable }];
+      }
+      return [];
     });
 
     const fromNpcs: InteractPoint[] = FEATURES.npcs

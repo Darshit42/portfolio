@@ -9,7 +9,7 @@
  *  [Oracle]      * plaza totem *      [Forge ★]
  *      [Market]           [Arena]
  *              [Tavern]  ← spawn
- *              [Gate]    ← south edge, opens at 6/6
+ *              [Gate]    ← south edge, opens once every guild sigil is earned
  */
 
 export type BuildingKind =
@@ -27,8 +27,6 @@ export interface Building {
   id: string;
   label: string;
   kind: BuildingKind;
-  /** Project relic enshrined here. Empty for non-project structures (tavern/gate). */
-  projectId?: string;
   /** World position of the building's center, [x, z]. */
   position: [number, number];
   /** Where the player stands to interact + where fast-travel drops them, [x, z]. */
@@ -64,7 +62,6 @@ export const BUILDINGS: Building[] = [
     id: "spire-of-training",
     label: "Spire of Training",
     kind: "spire",
-    projectId: "nemotron-rl",
     position: [-19, -24],
     approach: [-19, -16],
     half: [4, 4],
@@ -74,7 +71,6 @@ export const BUILDINGS: Building[] = [
     id: "guild-hall",
     label: "Open Source Guild Hall",
     kind: "guildhall",
-    projectId: "kubestellar-kyverno",
     position: [19, -24],
     approach: [19, -16],
     half: [6, 5],
@@ -84,7 +80,6 @@ export const BUILDINGS: Building[] = [
     id: "oracles-booth",
     label: "Oracle's Booth",
     kind: "booth",
-    projectId: "voice-agent",
     position: [-31, -2],
     approach: [-23, -2],
     half: [4, 4],
@@ -94,7 +89,6 @@ export const BUILDINGS: Building[] = [
     id: "agent-forge",
     label: "The Agent Forge",
     kind: "forge",
-    projectId: "self-healing-agent",
     position: [31, -2],
     approach: [23, -2],
     half: [6, 6],
@@ -104,7 +98,6 @@ export const BUILDINGS: Building[] = [
     id: "finddder-market",
     label: "Finddder Market",
     kind: "market",
-    projectId: "finddder",
     position: [-19, 17],
     approach: [-19, 9],
     half: [5, 4],
@@ -114,7 +107,6 @@ export const BUILDINGS: Building[] = [
     id: "the-arena",
     label: "The Arena",
     kind: "arena",
-    projectId: "jee-arena",
     position: [19, 17],
     approach: [19, 9],
     half: [6, 6],
@@ -153,9 +145,6 @@ export const BUILDINGS: Building[] = [
 
 export const buildingById = (id: string): Building | undefined =>
   BUILDINGS.find((b) => b.id === id);
-
-/** Buildings that hold a project relic, in a sensible quest/fast-travel order. */
-export const RELIC_BUILDINGS = BUILDINGS.filter((b) => b.projectId);
 
 export const TAVERN = buildingById("null-pointer-tavern")!;
 export const GATE = buildingById("gate-of-contact")!;

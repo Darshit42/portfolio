@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { BUILDINGS, WORLD_BOUNDS } from "../data/buildings";
-import { projectByBuilding } from "../data/projects";
+import { categoryByBuilding } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import { playerState } from "../game/playerState";
 
@@ -19,7 +19,7 @@ function toMap(x: number, z: number): [number, number] {
  *  via rAF so it never triggers re-renders. */
 export default function Minimap() {
   const marker = useRef<SVGGElement>(null);
-  const found = useGameStore((s) => s.foundRelics);
+  const sigils = useGameStore((s) => s.sigils);
   const requestTravel = useGameStore((s) => s.requestTravel);
 
   useEffect(() => {
@@ -64,8 +64,8 @@ export default function Minimap() {
 
         {BUILDINGS.map((b) => {
           const [x, y] = toMap(b.position[0], b.position[1]);
-          const project = projectByBuilding(b.id);
-          const claimed = project ? found.has(project.id) : false;
+          const category = categoryByBuilding(b.id);
+          const claimed = category ? sigils.has(category.id) : false;
           return (
             <g key={b.id} onClick={() => requestTravel(b.approach)} style={{ cursor: "pointer" }}>
               <circle

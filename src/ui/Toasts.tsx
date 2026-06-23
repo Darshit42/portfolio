@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { TOTAL_RELICS, projectById } from "../data/projects";
+import { TOTAL_SIGILS, categoryById } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import { RelicIcon } from "./icons";
 
@@ -11,23 +11,23 @@ interface Toast {
 
 let toastKey = 0;
 
-/** Transient feedback when a relic is claimed or the Gate unlocks. */
+/** Transient feedback when a guild sigil is earned or the Gate unlocks. */
 export default function Toasts() {
-  const found = useGameStore((s) => s.foundRelics);
-  const prev = useRef<Set<string>>(new Set(found));
+  const sigils = useGameStore((s) => s.sigils);
+  const prev = useRef<Set<string>>(new Set(sigils));
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   useEffect(() => {
     const added: string[] = [];
-    for (const id of found) if (!prev.current.has(id)) added.push(id);
-    prev.current = new Set(found);
+    for (const id of sigils) if (!prev.current.has(id)) added.push(id);
+    prev.current = new Set(sigils);
     if (added.length === 0) return;
 
     const next: Toast[] = added.map((id) => {
-      const p = projectById(id);
-      return { key: ++toastKey, text: `Relic claimed — ${p?.name ?? id}`, accent: p?.accent ?? "#e8c66a" };
+      const c = categoryById(id);
+      return { key: ++toastKey, text: `Sigil earned — ${c?.guildName ?? id}`, accent: c?.accent ?? "#e8c66a" };
     });
-    if (found.size >= TOTAL_RELICS) {
+    if (sigils.size >= TOTAL_SIGILS) {
       next.push({ key: ++toastKey, text: "The Gate of Contact has opened!", accent: "#6ad0ff" });
     }
 
@@ -36,7 +36,7 @@ export default function Toasts() {
       window.setTimeout(() => setToasts((t) => t.filter((x) => x.key !== toast.key)), 3600),
     );
     return () => timers.forEach(window.clearTimeout);
-  }, [found]);
+  }, [sigils]);
 
   if (toasts.length === 0) return null;
 

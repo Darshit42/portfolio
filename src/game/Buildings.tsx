@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Html } from "@react-three/drei";
 import { BUILDINGS } from "../data/buildings";
-import { projectByBuilding } from "../data/projects";
+import { categoryByBuilding } from "../data/categories";
 import { useGameStore, selectGateOpen } from "../store/useGameStore";
 import BuildingMesh from "./BuildingMesh";
 import RelicMonument from "./RelicMonument";
@@ -17,7 +17,7 @@ export default function Buildings() {
   const placements = useMemo(
     () =>
       BUILDINGS.map((b) => {
-        const project = projectByBuilding(b.id);
+        const category = categoryByBuilding(b.id);
         const dx = b.position[0] - b.approach[0];
         const dz = b.position[1] - b.approach[1];
         const len = Math.hypot(dx, dz) || 1;
@@ -29,34 +29,42 @@ export default function Buildings() {
         ];
         // Face the front (+z) toward the approach.
         const yaw = b.rotationY ?? Math.atan2(b.approach[0] - b.position[0], b.approach[1] - b.position[1]);
-        return { b, project, gem, yaw };
+        return { b, category, gem, yaw };
       }),
     [],
   );
 
   return (
     <group>
-      {placements.map(({ b, project, gem, yaw }) => (
-        <group key={b.id}>
-          <group position={[b.position[0], 0, b.position[1]]} rotation-y={yaw}>
-            <BuildingMesh kind={b.kind} accent={b.accent} />
+      {placements.map(({ b, category, gem, yaw }) => {
+        // A spare building hosts no guild yet — label it so it reads as
+        // "unclaimed", not broken (PRD: spares await future categories).
+        const isSpare = !category && (b.kind === "spire" || b.kind === "booth");
+        return (
+          <group key={b.id}>
+            <group position={[b.position[0], 0, b.position[1]]} rotation-y={yaw}>
+              <BuildingMesh kind={b.kind} accent={b.accent} />
+            </group>
+
+            {category && (
+              <RelicMonument
+                position={gem}
+                accent={category.accent}
+                categoryId={category.id}
+                label={category.guildName}
+              />
+            )}
+
+            {(b.kind === "tavern" || b.kind === "shrine") && (
+              <StructureLabel position={b.position} label={b.label} accent={b.accent} />
+            )}
+            {isSpare && (
+              <StructureLabel position={b.position} label={`${b.label} · unclaimed`} accent="#6b7488" />
+            )}
+            {b.kind === "gate" && <GateLabel position={b.position} label={b.label} />}
           </group>
-
-          {project && (
-            <RelicMonument
-              position={gem}
-              accent={project.accent}
-              projectId={project.id}
-              label={b.label}
-            />
-          )}
-
-          {(b.kind === "tavern" || b.kind === "shrine") && (
-            <StructureLabel position={b.position} label={b.label} accent={b.accent} />
-          )}
-          {b.kind === "gate" && <GateLabel position={b.position} label={b.label} />}
-        </group>
-      ))}
+        );
+      })}
     </group>
   );
 }

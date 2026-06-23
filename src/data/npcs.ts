@@ -19,7 +19,9 @@ export interface Npc {
   name: string;
   /** Building the NPC stands near. */
   building: string;
-  /** Optional project this NPC can point the visitor toward. */
+  /** If set, this NPC masters a guild — dialog can open its whole Codex list. */
+  categoryId?: string;
+  /** Optional single project this NPC points the visitor toward (no guild). */
   projectId?: string;
   position: [number, number]; // [x, z]
   /** Facing angle (radians) for the mesh. */
@@ -41,7 +43,7 @@ export const NPCS: Npc[] = [
     accent: "#e8c66a",
     lines: [
       { text: "Welcome to the Null Pointer, traveller. Mind the dangling references." },
-      { text: "Six relics, six legends. Gather them all and the southern Gate swings open." },
+      { text: "Every guild here guards a sigil. Earn them all and the southern Gate swings open." },
       { text: "In a hurry? There's a recruiter's door up top — straight to the good stuff." },
     ],
   },
@@ -51,14 +53,14 @@ export const NPCS: Npc[] = [
           id: "automaton",
           name: "The Automaton",
           building: "agent-forge",
-          projectId: "self-healing-agent",
+          categoryId: "ai-agents",
           position: [161.2, -59.3],
           facing: -1.2,
           accent: "#ff7a3c",
           lines: [
-            { text: "Forged to mend what the makers abandon. I read the trace, shape the patch, and send the scroll." },
-            { text: "Every verified fix feeds the policy. I am better today than yesterday; tomorrow, better still." },
-            { text: "Would you see my maker's design?" },
+            { text: "Welcome to the Arcane Forge — where models are hammered into agents that think and learn." },
+            { text: "I am one such work; there are others enshrined here beside me." },
+            { text: "Would you browse the Forge's ledger?" },
           ],
         },
       ] satisfies Npc[])
@@ -67,14 +69,14 @@ export const NPCS: Npc[] = [
     id: "guildmaster",
     name: "The Guildmaster",
     building: "guild-hall",
-    projectId: "kubestellar-kyverno",
+    categoryId: "systems-infra",
     position: [26, -15],
     facing: Math.PI * 1.15,
     accent: "#3aa0ff",
     lines: [
-      { text: "Every plaque on this wall is a merged pull request. Earned in the open, not handed down." },
-      { text: "Ten merges, twenty-five issues, across KubeStellar and Kyverno. Mentor-endorsed, all of it." },
-      { text: "Care to read the open-source ledger yourself?" },
+      { text: "This is the Foundry — distributed systems and open-source steel, merged in the open." },
+      { text: "Every plaque is earned, not handed down: contributions that actually shipped." },
+      { text: "Care to read the Foundry's ledger yourself?" },
     ],
   },
   {
@@ -95,14 +97,16 @@ export const NPCS: Npc[] = [
   // ---- flavor NPCs (no project) ----
   {
     id: "merchant",
-    name: "Wandering Merchant",
+    name: "The Merchant",
     building: "finddder-market",
+    categoryId: "products-data",
     position: [-23, 13],
     facing: Math.PI / 2,
     accent: "#f2b94c",
     lines: [
-      { text: "Scavenged wares, scouted bargains! I find what others overlook." },
-      { text: "Slay a few bugs and bring me coin — the realm rewards a busy blade." },
+      { text: "Welcome to the Exchange — shipped products and the data that moves them." },
+      { text: "I scout signal from noise, then turn it into something people actually use." },
+      { text: "Care to browse the wares on offer?" },
     ],
   },
   {
@@ -125,8 +129,8 @@ export const NPCS: Npc[] = [
     facing: Math.PI,
     accent: "#9aa6bf",
     lines: [
-      { text: "Halt. The Gate of Contact opens only to those who've gathered every relic." },
-      { text: "Six legends, traveller. Earn them, and the way south is yours." },
+      { text: "Halt. The Gate of Contact opens only to those who've earned every guild's sigil." },
+      { text: "Prove yourself at each guild, traveller, and the way south is yours." },
     ],
   },
 ];

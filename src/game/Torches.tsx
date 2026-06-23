@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import type { PointLight } from "three";
 import { Instances, Instance } from "@react-three/drei";
 import { BUILDINGS, PLAZA_CENTER } from "../data/buildings";
+import { categoryByBuilding } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import { MAT } from "./materials";
 import { daynight } from "./daynight";
@@ -47,9 +48,15 @@ function buildLayout(): { torches: P2[]; lights: P2[] } {
     torches.push({ x: doorX + px * 1.8, z: doorZ + pz * 1.8 });
     torches.push({ x: doorX - px * 1.8, z: doorZ - pz * 1.8 });
 
-    // One real light per entrance pair — relic buildings (forge's budget goes
-    // to its interior glow instead) plus the tavern. Gate stays emissive-only.
-    if ((b.projectId && b.kind !== "forge") || b.kind === "tavern") {
+    // One real light per entrance pair — guild + spare structures (the forge's
+    // budget goes to its interior glow instead) plus the tavern. Gate stays
+    // emissive-only.
+    const litStructure =
+      (categoryByBuilding(b.id) && b.kind !== "forge") ||
+      b.kind === "spire" ||
+      b.kind === "booth" ||
+      b.kind === "tavern";
+    if (litStructure) {
       lights.push({ x: doorX + ux * 0.6, z: doorZ + uz * 0.6 });
     }
   }

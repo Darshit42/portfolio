@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { SPAWN, buildingById } from "../data/buildings";
-import { TOTAL_RELICS } from "../data/projects";
+import { TOTAL_SIGILS } from "../data/categories";
 import { itemDef } from "../data/items";
 import { loadSaved, persist } from "./persist";
 
@@ -29,7 +29,7 @@ export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel"
 /** Modes in which player input should be frozen (an overlay is up). */
 export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "inventory", "title", "recruiter"];
 
-export type InteractableKind = "relic" | "gate" | "npc" | "forge" | "door" | "secret" | "skilltree";
+export type InteractableKind = "guild" | "gate" | "npc" | "door" | "secret" | "skilltree";
 
 export interface Interactable {
   kind: InteractableKind;
@@ -37,7 +37,8 @@ export interface Interactable {
   id: string;
   label: string;
   prompt: string;
-  projectId?: string;
+  /** Guild category id (for kind === "guild"). Drives the relic glow + sigil. */
+  categoryId?: string;
   /** Teleport destination for doors, [x, z]. */
   target?: [number, number];
 }
@@ -47,10 +48,11 @@ export interface GameState {
   /** Mode to return to when a transient overlay (help/pause) closes. */
   returnMode: UiMode;
 
-  foundRelics: Set<string>; // project ids
+  sigils: Set<string>; // category ids earned (the win condition)
   discovered: Set<string>; // building ids the player has approached
 
-  activeCodex: string | null; // project id
+  activeGuild: string | null; // category id — the open Codex LIST
+  activeCodex: string | null; // project id — the open project detail
   activeDialog: string | null; // npc id
   activeForge: boolean; // forge demo panel open
   activeGate: boolean; // contact gate panel open
@@ -91,8 +93,12 @@ export interface GameState {
   setMode: (m: UiMode) => void;
   enterRealm: () => void;
   openRecruiter: () => void;
+  /** Open a guild's Codex LIST (and earn its sigil). */
+  openGuild: (categoryId: string) => void;
+  /** Open a single project's detail (keeps any guild context for "back"). */
   openCodex: (projectId: string) => void;
-  openForge: () => void;
+  /** From a project detail, step back to its guild list. */
+  backToGuild: () => void;
   openDialog: (npcId: string) => void;
   openGate: () => void;
   openSkills: () => void;
@@ -102,7 +108,7 @@ export interface GameState {
   toggleHelp: () => void;
   togglePause: () => void;
 
-  findRelic: (projectId: string) => void;
+  earnSigil: (categoryId: string) => void;
   markDiscovered: (buildingId: string) => void;
   setNearby: (i: Interactable | null) => void;
 
@@ -134,9 +140,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   mode: "title",
   returnMode: "playing",
 
-  foundRelics: new Set(saved.foundRelics ?? []),
+  sigils: new Set(saved.sigils ?? []),
   discovered: new Set(),
 
+  activeGuild: null,
   activeCodex: null,
   activeDialog: null,
   activeForge: false,
@@ -171,32 +178,37 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   openRecruiter: () => set({ mode: "recruiter" }),
 
+  openGuild: (categoryId) => {
+    get().earnSigil(categoryId);
+    set({
+      mode: "codex",
+      activeGuild: categoryId,
+      activeCodex: null,
+      activeForge: false,
+      activeGate: false,
+      activeSkills: false,
+      activeDialog: null,
+    });
+  },
+
   openCodex: (projectId) =>
     set({ mode: "codex", activeCodex: projectId, activeForge: false, activeGate: false, activeSkills: false, activeDialog: null }),
 
-  openForge: () =>
-    set({ mode: "codex", activeForge: true, activeGate: false, activeSkills: false, activeCodex: "self-healing-agent" }),
+  backToGuild: () => set({ activeCodex: null }),
 
   openDialog: (npcId) => set({ mode: "dialog", activeDialog: npcId }),
 
-  openGate: () => set({ mode: "codex", activeGate: true, activeForge: false, activeSkills: false, activeCodex: null }),
+  openGate: () => set({ mode: "codex", activeGate: true, activeForge: false, activeSkills: false, activeGuild: null, activeCodex: null }),
 
   openSkills: () =>
-    set({ mode: "codex", activeSkills: true, activeForge: false, activeGate: false, activeCodex: null }),
+    set({ mode: "codex", activeSkills: true, activeForge: false, activeGate: false, activeGuild: null, activeCodex: null }),
 
   triggerInteract: () => {
     const n = get().nearby;
     if (!n) return;
     switch (n.kind) {
-      case "forge":
-        get().findRelic(n.projectId ?? "self-healing-agent");
-        get().openForge();
-        break;
-      case "relic":
-        if (n.projectId) {
-          get().findRelic(n.projectId);
-          get().openCodex(n.projectId);
-        }
+      case "guild":
+        if (n.categoryId) get().openGuild(n.categoryId);
         break;
       case "gate":
         if (selectGateOpen(get())) get().openGate();
@@ -220,6 +232,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   closeOverlay: () =>
     set({
       mode: "playing",
+      activeGuild: null,
       activeCodex: null,
       activeDialog: null,
       activeForge: false,
@@ -239,12 +252,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     else if (mode === "playing") set({ mode: "paused" });
   },
 
-  findRelic: (projectId) => {
-    const found = get().foundRelics;
-    if (found.has(projectId)) return;
-    const next = new Set(found);
-    next.add(projectId);
-    set({ foundRelics: next });
+  earnSigil: (categoryId) => {
+    const have = get().sigils;
+    if (have.has(categoryId)) return;
+    const next = new Set(have);
+    next.add(categoryId);
+    set({ sigils: next });
   },
 
   markDiscovered: (buildingId) => {
@@ -334,8 +347,8 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 }));
 
-/** Derived selector: are all relics found? */
-export const selectGateOpen = (s: GameState): boolean => s.foundRelics.size >= TOTAL_RELICS;
+/** Derived selector: is every guild sigil earned? */
+export const selectGateOpen = (s: GameState): boolean => s.sigils.size >= TOTAL_SIGILS;
 
 // Dev-only handle for the screenshot driver (programmatic arena/travel etc.).
 if (import.meta.env.DEV && typeof window !== "undefined") {
@@ -346,7 +359,7 @@ if (import.meta.env.DEV && typeof window !== "undefined") {
 // the flag is on and only writes when the snapshot actually changes.
 useGameStore.subscribe((s) =>
   persist({
-    foundRelics: [...s.foundRelics],
+    sigils: [...s.sigils],
     muted: s.muted,
     reducedMotion: s.reducedMotion,
     coins: s.coins,

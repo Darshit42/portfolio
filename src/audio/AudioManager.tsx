@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { TOTAL_RELICS } from "../data/projects";
+import { TOTAL_SIGILS } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import { resumeAudio, setMuted, sfxGate, sfxRelic, startAmbient } from "./audio";
 
@@ -10,8 +10,8 @@ import { resumeAudio, setMuted, sfxGate, sfxRelic, startAmbient } from "./audio"
  */
 export default function AudioManager() {
   const muted = useGameStore((s) => s.muted);
-  const found = useGameStore((s) => s.foundRelics);
-  const prevCount = useRef(found.size);
+  const sigils = useGameStore((s) => s.sigils);
+  const prevCount = useRef(sigils.size);
   const ambientStarted = useRef(false);
 
   // Resume on first gesture so unmuting later is instant + policy-compliant.
@@ -35,12 +35,12 @@ export default function AudioManager() {
   }, [muted]);
 
   useEffect(() => {
-    if (found.size > prevCount.current) {
-      if (found.size >= TOTAL_RELICS) sfxGate();
+    if (sigils.size > prevCount.current) {
+      if (sigils.size >= TOTAL_SIGILS) sfxGate();
       else sfxRelic();
     }
-    prevCount.current = found.size;
-  }, [found]);
+    prevCount.current = sigils.size;
+  }, [sigils]);
 
   return null;
 }

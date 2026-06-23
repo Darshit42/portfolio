@@ -1,11 +1,11 @@
 import { FEATURES } from "../data/config";
 
-/** Local-only save of found relics + settings (F22). No server, no sync. */
+/** Local-only save of earned guild sigils + settings (F22). No server, no sync. */
 
 const KEY = "devhalla:v1";
 
 export interface Saved {
-  foundRelics: string[];
+  sigils: string[];
   muted: boolean;
   reducedMotion: boolean;
   coins: number;

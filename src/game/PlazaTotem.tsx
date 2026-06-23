@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { Group, PointLight } from "three";
 import { PLAZA_CENTER } from "../data/buildings";
-import { PROJECTS } from "../data/projects";
+import { CATEGORIES } from "../data/categories";
 import { PALETTE } from "../data/config";
 import { useGameStore } from "../store/useGameStore";
 import { MAT } from "./materials";
@@ -10,11 +10,11 @@ import { MAT } from "./materials";
 /**
  * The plaza centerpiece (PRD-art §2): a stone fountain-monument lit from
  * within — the brightest focal point in town — that doubles as the in-world
- * relic tracker. One gem per project floats in a slow ring around the core;
- * each ignites in its accent colour when its relic is claimed.
+ * sigil tracker. One gem per guild floats in a slow ring around the core;
+ * each ignites in its accent colour when that guild's sigil is earned.
  */
 export default function PlazaTotem() {
-  const found = useGameStore((s) => s.foundRelics);
+  const sigils = useGameStore((s) => s.sigils);
   const reduced = useGameStore((s) => s.reducedMotion);
   const ring = useRef<Group>(null);
   const light = useRef<PointLight>(null);
@@ -73,11 +73,11 @@ export default function PlazaTotem() {
         decay={2}
       />
 
-      {/* relic tracker: one gem per project, igniting as relics are claimed */}
+      {/* sigil tracker: one gem per guild, igniting as sigils are earned */}
       <group ref={ring} position={[0, 2.6, 0]}>
-        {PROJECTS.map((p, i) => {
-          const a = (i / PROJECTS.length) * Math.PI * 2;
-          const claimed = found.has(p.id);
+        {CATEGORIES.map((p, i) => {
+          const a = (i / CATEGORIES.length) * Math.PI * 2;
+          const claimed = sigils.has(p.id);
           return (
             <mesh key={p.id} position={[Math.cos(a) * 2.5, 0, Math.sin(a) * 2.5]}>
               <octahedronGeometry args={[0.28, 0]} />

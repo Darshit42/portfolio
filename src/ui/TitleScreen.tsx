@@ -1,5 +1,5 @@
 import { OWNER, WORLD_NAME, WORLD_TAGLINE } from "../data/config";
-import { TOTAL_RELICS } from "../data/projects";
+import { TOTAL_SIGILS } from "../data/categories";
 import { useGameStore } from "../store/useGameStore";
 import { isTouchDevice } from "../game/webgl";
 import { ArrowRightIcon, CompassIcon, GithubIcon, MailIcon, RelicIcon } from "./icons";
@@ -45,7 +45,7 @@ export default function TitleScreen() {
         </h1>
         <p className="mt-4 max-w-md text-balance text-realm-muted animate-fade-in">{WORLD_TAGLINE}</p>
         <p className="mt-2 max-w-lg text-sm text-realm-muted/80 animate-fade-in">
-          A playable world where each building enshrines a project. Walk it, or skip straight to the work.
+          A stranger arrives; the guilds hold the legends. Prove yourself at each, or skip straight to the work.
         </p>
 
         <div className="mt-9 flex w-full max-w-md flex-col gap-3 animate-fade-in">
@@ -76,7 +76,7 @@ export default function TitleScreen() {
             <MailIcon width={20} height={20} />
           </a>
           <span className="text-realm-edge">·</span>
-          <span className="font-mono text-xs">{TOTAL_RELICS} relics to find</span>
+          <span className="font-mono text-xs">{TOTAL_SIGILS} guild sigils to earn</span>
         </div>
 
         {!webglFailed && (

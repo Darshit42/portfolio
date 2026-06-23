@@ -12,6 +12,7 @@ export default function DialogBox() {
   const npcId = useGameStore((s) => s.activeDialog);
   const close = useGameStore((s) => s.closeOverlay);
   const openCodex = useGameStore((s) => s.openCodex);
+  const openGuild = useGameStore((s) => s.openGuild);
   const tts = useTts();
 
   const npc = npcId ? npcById(npcId) : undefined;
@@ -21,6 +22,8 @@ export default function DialogBox() {
 
   const line = npc?.lines[lineIdx]?.text ?? "";
   const isLast = npc ? lineIdx >= npc.lines.length - 1 : true;
+  // A guild master opens its whole Codex list; a lone NPC points at one project.
+  const guildId = npc?.categoryId;
   const project = npc?.projectId ? projectById(npc.projectId) : undefined;
 
   // Reset on NPC change.
@@ -94,17 +97,30 @@ export default function DialogBox() {
           {typing.current && <span className="animate-blink">▌</span>}
         </p>
         <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-          {project && (
+          {guildId ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                openCodex(project.id);
+                openGuild(guildId);
               }}
               className="btn-ghost text-sm"
             >
-              Tell me more
+              Enter the guild
               <ArrowRightIcon width={15} height={15} />
             </button>
+          ) : (
+            project && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openCodex(project.id);
+                }}
+                className="btn-ghost text-sm"
+              >
+                Tell me more
+                <ArrowRightIcon width={15} height={15} />
+              </button>
+            )
           )}
           <button
             onClick={(e) => {
