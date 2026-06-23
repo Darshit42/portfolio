@@ -1,4 +1,4 @@
-import { OWNER, WORLD_NAME } from "../data/config";
+import { ACCOMPLISHMENTS, OWNER, WORLD_NAME } from "../data/config";
 import { PROJECTS, type Project } from "../data/projects";
 import { useGameStore } from "../store/useGameStore";
 import ForgeDemo from "./ForgeDemo";
@@ -64,6 +64,31 @@ export default function RecruiterMode() {
             <ProjectCard key={p.id} project={p} />
           ))}
         </div>
+
+        {/* Accomplishments & certifications */}
+        <section className="mt-10">
+          <h2 className="mb-4 font-mono text-xs uppercase tracking-[0.25em] text-realm-muted">
+            Accomplishments & Certifications
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {ACCOMPLISHMENTS.map((a) => (
+              <article
+                key={a.title}
+                className="flex flex-col gap-1 rounded-xl border border-realm-edge bg-realm-panel/60 p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="text-sm font-semibold text-realm-text">{a.title}</h3>
+                  {a.when && (
+                    <span className="shrink-0 rounded-full border border-realm-edge px-2 py-0.5 font-mono text-[10px] text-realm-gold">
+                      {a.when}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm leading-relaxed text-realm-muted">{a.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
 
         {/* Contact CTA */}
         <footer className="mt-10 flex flex-col items-center gap-4 rounded-2xl border border-realm-edge bg-realm-panel/60 px-6 py-8 text-center">

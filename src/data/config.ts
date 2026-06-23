@@ -32,20 +32,52 @@ export interface Owner {
   bio: string;
   github: string;
   email: string;
-  /** Served from /public. Replace the placeholder PDF before launch. */
+  /** Served from /public — the real résumé PDF (Darshit_Sengra_2026). */
   resumeUrl: string;
   linkedin?: string;
 }
 
 export const OWNER: Owner = {
-  name: "Darshit",
-  role: "Autonomous-systems & full-stack engineer",
-  bio: "I build self-healing agents, ship open-source to CNCF, and turn hard ideas into working software. This realm is my portfolio — every building below enshrines a project you can inspect.",
+  name: "Darshit Sengra",
+  role: "Forward Deployed Engineer · AI / full-stack",
+  bio: "I build autonomous agents, ML pipelines, and full-stack products — from a causal SRE platform to self-healing engineering agents. This realm is my portfolio: every building below enshrines a project you can inspect.",
   github: "https://github.com/Darshit42",
-  email: "shadow6920223@gmail.com",
-  resumeUrl: "/resume.pdf", // TODO(launch): drop the real resume into /public/resume.pdf
-  linkedin: undefined, // TODO(launch): add LinkedIn URL if desired
+  email: "darshit02736@gmail.com",
+  resumeUrl: "/resume.pdf",
+  linkedin: undefined, // TODO: add full LinkedIn URL (résumé links "Darshit Sengra")
 };
+
+/**
+ * Accomplishments & certifications — the recruiter-facing honors list, kept in
+ * sync with the résumé. Rendered in Recruiter Mode under the project index.
+ */
+export interface Accomplishment {
+  title: string;
+  detail: string;
+  /** Optional year/timeframe shown as a chip. */
+  when?: string;
+}
+
+export const ACCOMPLISHMENTS: Accomplishment[] = [
+  {
+    title: "Hackathon Winner — Polaris & Google for Developers",
+    detail: "1st place for an innovative women's safety application.",
+    when: "Feb 2025",
+  },
+  {
+    title: "WorldQuant International Quant Championship",
+    detail: "Top 20% of teams globally in Stage 1 (team \"Cornflakes\").",
+    when: "2026",
+  },
+  {
+    title: "AWS Cloud Practitioner Essentials",
+    detail: "Core AWS services, security, architecture, and pricing.",
+  },
+  {
+    title: "Competitive Programming",
+    detail: "Solved 450+ algorithmic problems on LeetCode.",
+  },
+];
 
 /**
  * Feature flags. Each milestone stays shippable by toggling these.
