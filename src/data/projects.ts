@@ -193,6 +193,7 @@ export const PROJECTS: Project[] = [
       "Paste YouTube and Instagram URLs and the app pulls their transcripts, embeds them with Gemini, and stores the vectors in ChromaDB for cosine retrieval. A LangGraph flow does a dual-retrieve pass and answers with gemini-2.5-flash, streaming the response over SSE into a Next.js UI with timestamped citation chips back to the source video.",
     stack: ["Next.js", "LangGraph", "Gemini", "ChromaDB", "SSE", "Python"],
     links: [
+      { label: "Live demo", url: "https://infllm.onrender.com/", kind: "demo" },
       { label: "GitHub", url: "https://github.com/Darshit42/infLLM", kind: "github" },
     ],
     accent: "#c08bff",
@@ -319,6 +320,7 @@ export const PROJECTS: Project[] = [
       "A finance dashboard built in TypeScript with a separate frontend and backend. A practice full-stack data app focused on presenting financial figures in a dashboard layout.",
     stack: ["TypeScript", "Node.js", "React"],
     links: [
+      { label: "Live demo", url: "https://finance-dashboard-qwfx.onrender.com/", kind: "demo" },
       { label: "GitHub", url: "https://github.com/Darshit42/Finance-dashboard", kind: "github" },
     ],
     accent: "#f2b94c",
