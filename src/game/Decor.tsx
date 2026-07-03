@@ -184,15 +184,19 @@ export default function Decor() {
 
   return (
     <group>
-      {/* pines — trunk + two foliage tiers, three instanced draw calls */}
-      <Instances limit={trees.length} castShadow>
+      {/* pines — trunk + two foliage tiers, three instanced draw calls.
+          frustumCulled must be OFF: the InstancedMesh's bounding sphere is the
+          bare geometry's at the origin, so three would cull the entire forest
+          the moment the world origin leaves the camera frustum (reachable now
+          that the player can roam to the treeline). */}
+      <Instances limit={trees.length} castShadow frustumCulled={false}>
         <cylinderGeometry args={[0.22, 0.32, 2, 8]} />
         <primitive object={MAT.trunk} attach="material" />
         {trees.map((t, i) => (
           <Instance key={i} position={[t.x, t.s, t.z]} scale={[1, t.s, 1]} rotation-y={t.rot} />
         ))}
       </Instances>
-      <Instances limit={trees.length} castShadow>
+      <Instances limit={trees.length} castShadow frustumCulled={false}>
         <coneGeometry args={[1.5, 2.6, 7]} />
         <primitive object={MAT.instWhite} attach="material" />
         {trees.map((t, i) => (
@@ -205,7 +209,7 @@ export default function Decor() {
           />
         ))}
       </Instances>
-      <Instances limit={trees.length} castShadow>
+      <Instances limit={trees.length} castShadow frustumCulled={false}>
         <coneGeometry args={[1.0, 2.0, 7]} />
         <primitive object={MAT.instWhite} attach="material" />
         {trees.map((t, i) => (
@@ -220,14 +224,14 @@ export default function Decor() {
       </Instances>
 
       {/* rocks + bushes */}
-      <Instances limit={rocks.length} castShadow>
+      <Instances limit={rocks.length} castShadow frustumCulled={false}>
         <dodecahedronGeometry args={[0.8, 0]} />
         <primitive object={MAT.rock} attach="material" />
         {rocks.map((r, i) => (
           <Instance key={i} position={[r.x, r.s * 0.4, r.z]} scale={r.s} rotation-y={r.rot} />
         ))}
       </Instances>
-      <Instances limit={bushes.length} castShadow>
+      <Instances limit={bushes.length} castShadow frustumCulled={false}>
         <icosahedronGeometry args={[0.7, 0]} />
         <primitive object={MAT.foliage} attach="material" />
         {bushes.map((b, i) => (
