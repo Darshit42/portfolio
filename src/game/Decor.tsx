@@ -75,6 +75,28 @@ function buildTrees(): Tree[] {
     });
   }
 
+  // the boundary wall — two staggered, tightly packed rings of big dark pines
+  // just past the playable radius (60), the classic "you shall not pass"
+  // treeline. Dense enough that no gap shows the void behind it.
+  const WALL_RINGS: { r: number; n: number }[] = [
+    { r: 61.5, n: 180 },
+    { r: 64.5, n: 200 },
+  ];
+  WALL_RINGS.forEach(({ r, n }, ringIdx) => {
+    for (let i = 0; i < n; i++) {
+      // half-step angular offset staggers the second ring into the first's gaps
+      const a = ((i + ringIdx * 0.5) / n) * Math.PI * 2 + (rand() - 0.5) * 0.02;
+      const rr = r + (rand() - 0.5) * 1.2;
+      trees.push({
+        x: Math.cos(a) * rr,
+        z: 1 + Math.sin(a) * rr,
+        s: 1.5 + rand() * 0.8,
+        rot: rand() * Math.PI * 2,
+        color: FOLIAGE.clone().lerp(FOLIAGE_FAR, 0.75 + rand() * 0.25),
+      });
+    }
+  });
+
   // sparse interior trees, clear of structures and paths
   let placed = 0;
   let guard = 0;
