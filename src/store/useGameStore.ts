@@ -57,6 +57,7 @@ export interface GameState {
   activeForge: boolean; // forge demo panel open
   activeGate: boolean; // contact gate panel open
   activeSkills: boolean; // skill-tree shrine panel open
+  activeSkillLabel: string | null; // title of the structure that opened it
 
   /** What the player is currently standing next to (drives the prompt). */
   nearby: Interactable | null;
@@ -101,7 +102,7 @@ export interface GameState {
   backToGuild: () => void;
   openDialog: (npcId: string) => void;
   openGate: () => void;
-  openSkills: () => void;
+  openSkills: (label?: string) => void;
   /** Acts on whatever the player is standing next to (keyboard E or tap). */
   triggerInteract: () => void;
   closeOverlay: () => void;
@@ -149,6 +150,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeForge: false,
   activeGate: false,
   activeSkills: false,
+  activeSkillLabel: null,
 
   nearby: null,
   travelTarget: null,
@@ -200,8 +202,8 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   openGate: () => set({ mode: "codex", activeGate: true, activeForge: false, activeSkills: false, activeGuild: null, activeCodex: null }),
 
-  openSkills: () =>
-    set({ mode: "codex", activeSkills: true, activeForge: false, activeGate: false, activeGuild: null, activeCodex: null }),
+  openSkills: (label) =>
+    set({ mode: "codex", activeSkills: true, activeSkillLabel: label ?? null, activeForge: false, activeGate: false, activeGuild: null, activeCodex: null }),
 
   triggerInteract: () => {
     const n = get().nearby;
@@ -214,7 +216,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         if (selectGateOpen(get())) get().openGate();
         break;
       case "skilltree":
-        get().openSkills();
+        get().openSkills(n.label);
         break;
       case "npc":
         get().openDialog(n.id);

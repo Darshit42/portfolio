@@ -49,8 +49,8 @@ export default function Player() {
       if (b.kind === "gate") {
         return [{ point: b.approach, data: { kind: "gate", id: b.id, label: b.label, prompt: "Approach the Gate" } as Interactable }];
       }
-      if (b.kind === "shrine") {
-        return [{ point: b.approach, data: { kind: "skilltree", id: b.id, label: b.label, prompt: "Read the Skill Shrine" } as Interactable }];
+      if (b.kind === "shrine" || b.kind === "spire") {
+        return [{ point: b.approach, data: { kind: "skilltree", id: b.id, label: b.label, prompt: "Study the skill tree" } as Interactable }];
       }
       return [];
     });

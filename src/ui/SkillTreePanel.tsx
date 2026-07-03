@@ -11,15 +11,17 @@ import {
 } from "../data/skills";
 import Modal from "./Modal";
 
-/** The Shrine of Mastery — the stack as an RPG skill tree (branches + levels). */
+/** The stack as an RPG skill tree (branches + levels). Reached from the Shrine
+ *  of Mastery or the Spire of Training — the title follows whichever you entered. */
 export default function SkillTreePanel() {
   const close = useGameStore((s) => s.closeOverlay);
+  const title = useGameStore((s) => s.activeSkillLabel) ?? "Shrine of Mastery";
   const byId = (id: string) => SKILLS.find((s) => s.id === id);
   const cats = Object.keys(SKILL_CATS) as SkillCat[];
 
   return (
     <Modal
-      title="Shrine of Mastery"
+      title={title}
       subtitle="The stack, as a skill tree"
       accent="#9b8cff"
       onClose={close}

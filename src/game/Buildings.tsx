@@ -55,10 +55,10 @@ export default function Buildings() {
               />
             )}
 
-            {(b.kind === "tavern" || b.kind === "shrine") && (
+            {(b.kind === "tavern" || b.kind === "shrine" || b.kind === "spire") && (
               <StructureLabel position={b.position} label={b.label} accent={b.accent} />
             )}
-            {isSpare && (
+            {isSpare && b.kind !== "spire" && (
               <StructureLabel position={b.position} label={`${b.label} · unclaimed`} accent="#6b7488" />
             )}
             {b.kind === "gate" && <GateLabel position={b.position} label={b.label} />}
