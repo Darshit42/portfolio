@@ -49,13 +49,15 @@ export const PLAZA_CENTER: [number, number] = [0, 2];
 
 /** World bounds — the rectangle that contains the playable disc (used for
  *  ground sizing, decor scatter, and mob clamping). */
-export const WORLD_BOUNDS = { minX: -50, maxX: 50, minZ: -49, maxZ: 51 };
+export const WORLD_BOUNDS = { minX: -62, maxX: 62, minZ: -61, maxZ: 63 };
 
 /** The player roams a DISC (the forest is a ring, so a circle lets you reach
  *  the treeline all the way around instead of stopping short on the diagonals).
- *  Center matches the treeline center in Decor; radius sits just inside it. */
+ *  Center matches the treeline center in Decor (ring at r 50–64); the radius
+ *  reaches THROUGH the forest, stopping just inside the deepest trees so the
+ *  woods are explorable but the void beyond never comes into view. */
 export const WORLD_CENTER: [number, number] = [0, 1];
-export const WORLD_RADIUS = 48;
+export const WORLD_RADIUS = 60;
 
 export const BUILDINGS: Building[] = [
   {
