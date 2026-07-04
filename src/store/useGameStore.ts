@@ -29,7 +29,7 @@ export const WORLD_MODES: UiMode[] = ["playing", "codex", "dialog", "fasttravel"
 /** Modes in which player input should be frozen (an overlay is up). */
 export const FROZEN_MODES: UiMode[] = ["codex", "dialog", "fasttravel", "help", "paused", "inventory", "title", "recruiter"];
 
-export type InteractableKind = "guild" | "gate" | "npc" | "door" | "secret" | "skilltree";
+export type InteractableKind = "guild" | "gate" | "npc" | "door" | "secret" | "skilltree" | "traveler";
 
 export interface Interactable {
   kind: InteractableKind;
@@ -58,6 +58,7 @@ export interface GameState {
   activeGate: boolean; // contact gate panel open
   activeSkills: boolean; // skill-tree shrine panel open
   activeSkillLabel: string | null; // title of the structure that opened it
+  activeTraveler: string | null; // traveler id — the open tavern Q&A
 
   /** What the player is currently standing next to (drives the prompt). */
   nearby: Interactable | null;
@@ -103,6 +104,7 @@ export interface GameState {
   openDialog: (npcId: string) => void;
   openGate: () => void;
   openSkills: (label?: string) => void;
+  openTraveler: (id: string) => void;
   /** Acts on whatever the player is standing next to (keyboard E or tap). */
   triggerInteract: () => void;
   closeOverlay: () => void;
@@ -151,6 +153,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeGate: false,
   activeSkills: false,
   activeSkillLabel: null,
+  activeTraveler: null,
 
   nearby: null,
   travelTarget: null,
@@ -205,6 +208,9 @@ export const useGameStore = create<GameState>((set, get) => ({
   openSkills: (label) =>
     set({ mode: "codex", activeSkills: true, activeSkillLabel: label ?? null, activeForge: false, activeGate: false, activeGuild: null, activeCodex: null }),
 
+  // The traveler Q&A rides the "dialog" mode (frozen input) but its own overlay.
+  openTraveler: (id) => set({ mode: "dialog", activeTraveler: id, activeDialog: null }),
+
   triggerInteract: () => {
     const n = get().nearby;
     if (!n) return;
@@ -217,6 +223,9 @@ export const useGameStore = create<GameState>((set, get) => ({
         break;
       case "skilltree":
         get().openSkills(n.label);
+        break;
+      case "traveler":
+        get().openTraveler(n.id);
         break;
       case "npc":
         get().openDialog(n.id);
@@ -240,6 +249,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       activeForge: false,
       activeGate: false,
       activeSkills: false,
+      activeTraveler: null,
     }),
 
   toggleHelp: () => {

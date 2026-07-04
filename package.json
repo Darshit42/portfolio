@@ -6,6 +6,8 @@
   "description": "A playable RPG world that is a software portfolio.",
   "scripts": {
     "dev": "vite",
+    "build:kb": "node scripts/build-kb.mjs",
+    "prebuild": "node scripts/build-kb.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"

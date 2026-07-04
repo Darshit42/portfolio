@@ -5,6 +5,7 @@ import { BUILDINGS } from "../data/buildings";
 import { categoryByBuilding } from "../data/categories";
 import { NPCS } from "../data/npcs";
 import { DOORS } from "../data/interiors";
+import { worldlyTraveler } from "../data/travelers";
 import { SECRETS } from "../data/quests";
 import { FEATURES } from "../data/config";
 import { rigConfig } from "../data/rigs";
@@ -74,7 +75,16 @@ export default function Player() {
       data: { kind: "secret", id: s.id, label: s.notice, prompt: s.prompt } as Interactable,
     }));
 
-    return [...fromBuildings, ...fromNpcs, ...fromDoors, ...fromSecrets];
+    // The worldly traveler in the tavern interior — opens the Q&A overlay.
+    const traveler = FEATURES.interiors ? worldlyTraveler() : undefined;
+    const fromTravelers: InteractPoint[] = traveler
+      ? [{
+          point: traveler.position,
+          data: { kind: "traveler", id: traveler.id, label: traveler.name, prompt: `Speak with ${traveler.name}` } as Interactable,
+        }]
+      : [];
+
+    return [...fromBuildings, ...fromNpcs, ...fromDoors, ...fromSecrets, ...fromTravelers];
   }, []);
 
   useFrame((_, delta) => {

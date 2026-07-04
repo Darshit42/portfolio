@@ -123,8 +123,72 @@ The frontend replays these as: a market-prices readout, brief coin/▲ flashes o
 trades, and an **Agent Inspector** economy panel (coin, need bars, inventory,
 recent transactions).
 
+## Worldly-traveler Q&A (`POST /ask`)
+
+A second, independently gated live feature: one guarded endpoint that answers a
+player's typed question **in character**, grounded in a KB about Darshit. A
+traveler in the tavern speaks the answer; the ambient traveler chatter is baked
+(zero API). Like Live Mode, it is **off by design** and the tavern is fully alive
+without it.
+
+**The key never ships to the browser.** The frontend calls *this* endpoint by
+URL (`VITE_AGENT_SERVER`); the Gemini key stays server-side in the root `.env`
+(non-`VITE_`, so Vite can't expose it). Verified: neither the key nor any Gemini
+SDK/endpoint appears in the built bundle — only our own `/ask` URL, and only when
+the feature is enabled (it is tree-shaken out otherwise).
+
+### The KB (grounding)
+
+`public/kb.json` is **generated from `/src/data`** (the source of truth) by
+`scripts/build-kb.mjs` — it runs automatically before `npm run build`, or on
+demand:
+
+```bash
+npm run build:kb     # regenerate public/kb.json from src/data
+```
+
+It carries only public portfolio content (projects, owner, honours, guilds,
+skills). `server/kb.py` turns it into a compact LORE digest and the strict
+grounding prompt: answer **only** from the KB; if unknown, deflect **in
+character** and stop; never invent facts/links/employers/dates; off-topic or
+prompt-injection attempts get an in-character deflection, not compliance.
+
+### Guardrails (all converge on the one existing LLM choke point)
+
+| Guard | Where | Env knob |
+|-------|-------|----------|
+| Kill switch | off unless enabled **and** a key exists | `TAVERN_QA_ENABLED` |
+| Per-IP rate limit | in-process sliding window (min + hour) | `TAVERN_RATE_PER_MIN`, `TAVERN_RATE_PER_HOUR` |
+| Output cap | `max_output_tokens` on the call | `TAVERN_ANSWER_MAX_TOKENS` |
+| Input cap | question hard-trimmed | `TAVERN_QUESTION_MAX_CHARS` |
+| Per-request token cap | `TokenMeter` budget → `BudgetExceeded` | `TAVERN_REQUEST_TOKEN_CAP` |
+| Timeout | per-call **and** a hard async wall-clock | `TAVERN_ANSWER_TIMEOUT` |
+| Cache | free repeats via the persistent `(model, prompt)` cache | — |
+| CORS | restrict origins in prod | `TAVERN_ALLOWED_ORIGINS` |
+
+No new cache, no new dependency, no DB: grounding is a compact prompt, and the
+call goes through `llm.LLM.complete` (cache → budget → retry → offline) exactly
+like the sim.
+
+### Run it (optional)
+
+```bash
+TAVERN_QA_ENABLED=1 python -m server serve --host 127.0.0.1 --port 8000
+```
+
+Then in `src/data/config.ts` set `FEATURES.tavernLiveQA = true`, and point the
+frontend at the server with `VITE_AGENT_SERVER` if it isn't on `localhost:8000`.
+
+### Degradation (the tavern works with this fully off)
+
+Every failure path — feature off, no key, no server, network error, timeout,
+rate-limited, budget tripped — returns `{ "ok": false, "reason": ... }`, and the
+frontend answers with a **baked in-character deflection** ("that tale hasn't
+reached me"). The live call fires **only** on an explicit player submit — never on
+load, on entering the tavern, or on a timer. Ambient chatter is always baked.
+
 ## Graceful degradation
 
 If the log is missing/malformed, or live mode fails, the frontend silently falls
-back to static NPCs / baked replay — no error wall. The six project relics and
-Recruiter Mode never touch this server.
+back to static NPCs / baked replay — no error wall. The project relics, the
+worldly-traveler chatter, and Recruiter Mode never depend on this server.

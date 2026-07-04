@@ -4,6 +4,7 @@ Endpoints:
   GET  /health           liveness + offline/key status
   GET  /events           SSE stream of world events for one live session
   POST /rumor            inject a memory into the active session's agent
+  POST /ask              worldly-traveler grounded Q&A (guarded; see traveler.py)
 
 Cost is hard-capped per session: a TokenMeter with LIVE_TOKEN_BUDGET (the LLM
 raises BudgetExceeded when exhausted → kill switch), a wall-clock timeout, and
@@ -11,8 +12,9 @@ at most LIVE_MAX_AGENTS agents. Every streamed event carries the remaining token
 budget so the frontend can show it. Nothing here runs unless the visitor opens
 the stream — the baked replay needs none of this.
 """
-from __future__ import annotations
-
+# NB: no ``from __future__ import annotations`` here — FastAPI must resolve the
+# ``request: Request`` route hints at registration time, and ``Request`` is
+# imported inside _build_app(), so stringized annotations would break routing.
 import asyncio
 import json
 import threading
@@ -38,9 +40,11 @@ def _build_app():
     from sse_starlette.sse import EventSourceResponse
 
     app = FastAPI(title="Agent Town", version="0.1.0")
+    # Lock down to configured origins in production; "*" only when none are set
+    # (local dev). Set TAVERN_ALLOWED_ORIGINS before any public deploy.
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # dev only; lock down before any public deploy
+        allow_origins=CONFIG.allowed_origins,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -48,7 +52,31 @@ def _build_app():
     @app.get("/health")
     def health():
         return {"ok": True, "offline": not CONFIG.has_key, "model": CONFIG.model,
-                "maxAgents": CONFIG.live_max_agents, "tokenBudget": CONFIG.live_token_budget}
+                "maxAgents": CONFIG.live_max_agents, "tokenBudget": CONFIG.live_token_budget,
+                "travelerQa": CONFIG.tavern_qa_live}
+
+    @app.post("/ask")
+    async def ask(request: Request):
+        """Worldly-traveler Q&A. Guarded in traveler.answer_question; wrapped here
+        in a hard wall-clock timeout so a hung provider can never pin the route.
+        Always returns a plain dict — the frontend degrades on ``ok: False``."""
+        from .traveler import answer_question
+
+        try:
+            payload = await request.json()
+        except Exception:
+            payload = {}
+        question = str(payload.get("question", "")) if isinstance(payload, dict) else ""
+        # Prefer the proxy-forwarded client IP when deployed behind one.
+        fwd = request.headers.get("x-forwarded-for", "")
+        ip = fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "anon")
+        try:
+            return await asyncio.wait_for(
+                asyncio.get_event_loop().run_in_executor(None, answer_question, ip, question),
+                timeout=CONFIG.tavern_answer_timeout + 3.0,
+            )
+        except asyncio.TimeoutError:
+            return {"ok": False, "reason": "timeout"}
 
     @app.get("/events")
     async def events(request: Request):

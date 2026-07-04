@@ -14,6 +14,7 @@ import AgentTown from "../agents/AgentTown";
 import Enemies from "./Enemies";
 import Pickups from "./Pickups";
 import Interior from "./Interior";
+import TavernTravelers from "./TavernTravelers";
 import Secrets from "./Secrets";
 import Particles from "./Particles";
 import PostFX from "./PostFX";
@@ -55,6 +56,7 @@ export default function World() {
         {FEATURES.combat && <Enemies />}
         {FEATURES.combat && <Pickups />}
         {FEATURES.interiors && <Interior />}
+        {FEATURES.interiors && FEATURES.npcs && <TavernTravelers />}
         <Secrets />
         <Player />
         {FEATURES.particles && !touch && <Particles />}

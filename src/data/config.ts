@@ -92,6 +92,7 @@ export const FEATURES = {
   minimap: true, //   P1 (F19)
   tts: true, //       P1 (F21) — Voice Oracle reads its blurb
   liveAgentWs: false, // P2 (F24) — real agent feed over WebSocket
+  tavernLiveQA: false, // P2 — worldly traveler live Q&A (needs a deployed server + VITE_AGENT_SERVER); baked chatter otherwise
   localSave: true, //  P2 (F22)
   particles: true, //  P2 (F23) — cheap glow/sparks, always gated by reduced-motion
   postfx: true, //     Bloom + vignette; auto-disabled on touch devices for perf
