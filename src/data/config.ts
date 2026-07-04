@@ -95,7 +95,12 @@ export const FEATURES = {
   tavernLiveQA: false, // P2 — worldly traveler live Q&A (needs a deployed server + VITE_AGENT_SERVER); baked chatter otherwise
   localSave: true, //  P2 (F22)
   particles: true, //  P2 (F23) — cheap glow/sparks, always gated by reduced-motion
-  postfx: true, //     Bloom + vignette; auto-disabled on touch devices for perf
+  // OFF: the bloom composer needs a half-float HDR target; on GPUs/drivers that
+  // lack it (or lack MULTISAMPLED half-float), HDR clamps to white before tone
+  // mapping and the ground/foliage blow out to a white glow. With this off the
+  // renderer's own ACES tone mapping handles every phase correctly on all GPUs
+  // (just no bloom glow). Re-enable only behind a real per-GPU capability gate.
+  postfx: false, //    Bloom + vignette — disabled for cross-GPU correctness
 } as const;
 
 export type FeatureFlag = keyof typeof FEATURES;
