@@ -75,27 +75,38 @@ function buildTrees(): Tree[] {
     });
   }
 
-  // the boundary wall — two staggered, tightly packed rings of big dark pines
-  // just past the playable radius (60), the classic "you shall not pass"
-  // treeline. Dense enough that no gap shows the void behind it.
-  const WALL_RINGS: { r: number; n: number }[] = [
-    { r: 61.5, n: 180 },
-    { r: 64.5, n: 200 },
+  // Beyond the playable edge (r 60) the forest must NOT stop at a wall — it
+  // fades outward as a DENSITY GRADIENT so the world reads as an endless forest,
+  // not a mapped-off edge. Randomly-placed pines in widening annular bands whose
+  // density climbs with distance: sparse & gappy just outside (≈ the interior
+  // forest), thickening through a middle band, to an impenetrable dark mass far
+  // out that melts into the fog. Scale grows and colour darkens with distance so
+  // the treeline blends into the horizon. Purely decorative — no collision (the
+  // player clamps at the world radius), and instanced with everything else.
+  const OUTER_BANDS: { r0: number; r1: number; n: number; gap: number }[] = [
+    { r0: 62, r1: 72, n: 130, gap: 0.1 }, //  transition — sparse/medium, small gaps
+    { r0: 72, r1: 83, n: 300, gap: 0.04 }, // middle — denser, few gaps
+    { r0: 83, r1: 95, n: 470, gap: 0.0 }, //  far — dense enough to hide the end
   ];
-  WALL_RINGS.forEach(({ r, n }, ringIdx) => {
-    for (let i = 0; i < n; i++) {
-      // half-step angular offset staggers the second ring into the first's gaps
-      const a = ((i + ringIdx * 0.5) / n) * Math.PI * 2 + (rand() - 0.5) * 0.02;
-      const rr = r + (rand() - 0.5) * 1.2;
+  for (const band of OUTER_BANDS) {
+    for (let i = 0; i < band.n; i++) {
+      if (rand() < band.gap) continue; // occasional openings, never a solid line
+      const a = rand() * Math.PI * 2; // random angle — no planted rows
+      const rr = band.r0 + rand() * (band.r1 - band.r0) + (rand() - 0.5) * 2.0;
+      const distT = Math.max(0, Math.min(1, (rr - 62) / 33));
+      // mass grows toward the horizon; ±~18% jitter so no two read the same
+      const base = 1.0 + 0.4 * distT;
+      // the deeper out, the darker — blends the far treeline into the fog
+      const shade = Math.min(1, 0.4 + 0.6 * distT + rand() * 0.18);
       trees.push({
         x: Math.cos(a) * rr,
         z: 1 + Math.sin(a) * rr,
-        s: 1.5 + rand() * 0.8,
+        s: base * (0.85 + rand() * 0.35),
         rot: rand() * Math.PI * 2,
-        color: FOLIAGE.clone().lerp(FOLIAGE_FAR, 0.75 + rand() * 0.25),
+        color: FOLIAGE.clone().lerp(FOLIAGE_FAR, shade),
       });
     }
-  });
+  }
 
   // sparse interior trees, clear of structures and paths
   let placed = 0;

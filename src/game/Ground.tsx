@@ -72,8 +72,11 @@ function scatter(count: number, seed: number, minS: number, maxS: number, margin
 }
 
 export default function Ground() {
-  const width = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX + 40;
-  const depth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ + 40;
+  // The plane runs well past the playable bounds so the outer forest gradient
+  // (trees out to r≈95) sits on terrain, not void — its far edge (~r108) is
+  // hidden behind the dense far treeline + fog, never seen from the map edge.
+  const width = WORLD_BOUNDS.maxX - WORLD_BOUNDS.minX + 92;
+  const depth = WORLD_BOUNDS.maxZ - WORLD_BOUNDS.minZ + 92;
   const cx = (WORLD_BOUNDS.minX + WORLD_BOUNDS.maxX) / 2;
   const cz = (WORLD_BOUNDS.minZ + WORLD_BOUNDS.maxZ) / 2;
 
