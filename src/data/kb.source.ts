@@ -17,7 +17,6 @@ export interface Kb {
   projects: { name: string; tier: string; oneLiner: string; blurb: string; stack: string[] }[];
   guilds: { guildName: string; tagline: string }[];
   skills: { label: string }[];
-  generatedAt: string;
 }
 
 export function buildKb(): Kb {
@@ -42,6 +41,5 @@ export function buildKb(): Kb {
     })),
     guilds: CATEGORIES.map((c) => ({ guildName: c.guildName, tagline: c.tagline })),
     skills: SKILLS.map((s) => ({ label: s.label })),
-    generatedAt: new Date().toISOString(),
   };
 }
