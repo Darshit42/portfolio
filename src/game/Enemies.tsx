@@ -14,6 +14,10 @@ import MonsterRig, { makeRigCtrl, resetRigCtrl } from "./MonsterRig";
 const MAX = 12;
 const WORLD_COUNT = 6;
 const ATTACK_RANGE = 3.0;
+// A swing only lands in a frontal arc of the player's facing — not a radius.
+// Enemies behind or to the far sides are missed (cos of the half-arc; ±80°).
+const ATTACK_ARC_COS = Math.cos((80 * Math.PI) / 180);
+const POINT_BLANK = 1.05; // very close hits always land, regardless of facing
 const RESPAWN_DELAY = 6000;
 const INVULN = 1500;
 const KNOCKBACK = 1.6;
@@ -216,6 +220,9 @@ export default function Enemies() {
     }
 
     const attacking = consumeAttack();
+    // Facing-forward unit vector for the directional swing (see the hit test).
+    const fwdX = Math.sin(playerState.facing);
+    const fwdZ = Math.cos(playerState.facing);
     let arenaAlive = 0;
 
     for (let s = 0; s < MAX; s++) {
@@ -298,7 +305,10 @@ export default function Enemies() {
       e.pos.x = clamp(e.pos.x + e.vx * speed * dt, WORLD_BOUNDS.minX, WORLD_BOUNDS.maxX);
       e.pos.z = clamp(e.pos.z + e.vz * speed * dt, WORLD_BOUNDS.minZ, WORLD_BOUNDS.maxZ);
 
-      if (attacking && dist < ATTACK_RANGE) {
+      // Directional swing: within reach AND inside the frontal arc (or point
+      // blank). dx/dz point enemy→player, so player→enemy is (-dx,-dz).
+      const inArc = dist < POINT_BLANK || (fwdX * -dx + fwdZ * -dz) / dist >= ATTACK_ARC_COS;
+      if (attacking && dist < ATTACK_RANGE && inArc) {
         e.hp -= 1;
         e.hitUntil = now + 150;
         e.pos.x -= (dx / dist) * KNOCKBACK;

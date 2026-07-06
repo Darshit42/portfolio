@@ -1,6 +1,7 @@
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import type { Group, Mesh, MeshBasicMaterial } from "three";
+import { DoubleSide } from "three";
+import type { Group, MeshBasicMaterial } from "three";
 import { BUILDINGS } from "../data/buildings";
 import { categoryByBuilding } from "../data/categories";
 import { NPCS } from "../data/npcs";
@@ -32,7 +33,8 @@ interface InteractPoint {
 
 export default function Player() {
   const group = useRef<Group>(null);
-  const swing = useRef<Mesh>(null);
+  const swing = useRef<Group>(null);
+  const swingMat = useRef<MeshBasicMaterial>(null);
   const ctrl = useRef(makeRigCtrl(Math.PI));
   const lastAttack = useRef(combat.lastAttackAt);
   const lastHit = useRef(combat.lastHitAt);
@@ -130,14 +132,16 @@ export default function Player() {
       ctrl.current.oneShotSeq++;
     }
 
-    // attack swing shockwave
+    // Directional attack slash — a crescent that sweeps across the facing arc
+    // in the direction the player is looking (not a radial shockwave).
     if (swing.current) {
       const since = performance.now() - combat.lastAttackAt;
-      if (since < 220) {
-        const p = since / 220;
+      if (since < 240) {
+        const p = since / 240;
+        const SWEEP = 1.5; // radians the blade travels during the swing
         swing.current.visible = true;
-        swing.current.scale.setScalar(0.4 + p * 2.8);
-        (swing.current.material as MeshBasicMaterial).opacity = 0.5 * (1 - p);
+        swing.current.rotation.y = playerState.facing - SWEEP / 2 + p * SWEEP;
+        if (swingMat.current) swingMat.current.opacity = 0.6 * (1 - p);
       } else {
         swing.current.visible = false;
       }
@@ -165,12 +169,22 @@ export default function Player() {
         <meshBasicMaterial color="#000000" transparent opacity={0.3} />
       </mesh>
 
-      {/* attack swing shockwave (combat only) */}
+      {/* directional attack slash (combat only) — a forward crescent the swing
+          logic aims and sweeps along the player's facing; opens toward local +Z */}
       {FEATURES.combat && (
-        <mesh ref={swing} rotation-x={-Math.PI / 2} position={[0, 0.1, 0]} visible={false}>
-          <ringGeometry args={[0.7, 1, 28]} />
-          <meshBasicMaterial color="#e8c66a" transparent opacity={0.5} toneMapped={false} />
-        </mesh>
+        <group ref={swing} visible={false}>
+          <mesh rotation-x={-Math.PI / 2} position={[0, 0.12, 0]}>
+            <ringGeometry args={[1.0, 2.4, 24, 1, -Math.PI / 2 - 0.7, 1.4]} />
+            <meshBasicMaterial
+              ref={swingMat}
+              color="#ffe6a0"
+              transparent
+              opacity={0.6}
+              side={DoubleSide}
+              toneMapped={false}
+            />
+          </mesh>
+        </group>
       )}
 
       {/* hero fill — a faint warm lantern-glow on the camera side so the
