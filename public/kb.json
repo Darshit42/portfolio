@@ -2,7 +2,7 @@
   "owner": {
     "name": "Darshit Sengra",
     "role": "Forward Deployed Engineer · AI / full-stack",
-    "bio": "I build autonomous agents, ML pipelines, and full-stack products — from a causal SRE platform to self-healing engineering agents. This realm is my portfolio: every building below enshrines a project you can inspect.",
+    "bio": "I build autonomous agents, ML pipelines, and full-stack products — from a causal SRE platform to real-time voice agents. This realm is my portfolio: every building below enshrines a project you can inspect.",
     "github": "https://github.com/Darshit42"
   },
   "accomplishments": [
@@ -26,20 +26,6 @@
     }
   ],
   "projects": [
-    {
-      "name": "Self-Healing Agent",
-      "tier": "flagship",
-      "oneLiner": "An agent that finds, fixes and ships GitHub issues on its own.",
-      "blurb": "An autonomous engineering agent that resolves real GitHub issues unattended: it clones the repo, localizes the fault, generates a patch with a GRPO-trained policy, verifies against the test suite, opens a pull request, and learns from the reward. It runs continuously on a tmux/systemd runtime — no human in the loop.",
-      "stack": [
-        "LangGraph",
-        "GRPO",
-        "LoRA",
-        "vLLM",
-        "Python",
-        "systemd"
-      ]
-    },
     {
       "name": "KubeStellar + Kyverno",
       "tier": "open source",
