@@ -39,7 +39,7 @@ export default function Buildings() {
       {placements.map(({ b, category, gem, yaw }) => {
         // A spare building hosts no guild yet — label it so it reads as
         // "unclaimed", not broken (PRD: spares await future categories).
-        const isSpare = !category && (b.kind === "spire" || b.kind === "booth");
+        const isSpare = !category && b.kind === "booth";
         return (
           <group key={b.id}>
             <group position={[b.position[0], 0, b.position[1]]} rotation-y={yaw}>
@@ -55,7 +55,7 @@ export default function Buildings() {
               />
             )}
 
-            {(b.kind === "tavern" || b.kind === "shrine") && (
+            {(b.kind === "tavern" || b.kind === "shrine" || b.kind === "spire") && (
               <StructureLabel position={b.position} label={b.label} accent={b.accent} />
             )}
             {isSpare && (

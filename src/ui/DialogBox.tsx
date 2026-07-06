@@ -13,6 +13,7 @@ export default function DialogBox() {
   const close = useGameStore((s) => s.closeOverlay);
   const openCodex = useGameStore((s) => s.openCodex);
   const openGuild = useGameStore((s) => s.openGuild);
+  const openSpire = useGameStore((s) => s.openSpire);
   const tts = useTts();
 
   const npc = npcId ? npcById(npcId) : undefined;
@@ -97,7 +98,18 @@ export default function DialogBox() {
           {typing.current && <span className="animate-blink">▌</span>}
         </p>
         <div className="mt-3 flex flex-wrap items-center justify-end gap-2">
-          {guildId ? (
+          {npc.opensSpire ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openSpire();
+              }}
+              className="btn-ghost text-sm"
+            >
+              Read the Chronicle
+              <ArrowRightIcon width={15} height={15} />
+            </button>
+          ) : guildId ? (
             <button
               onClick={(e) => {
                 e.stopPropagation();

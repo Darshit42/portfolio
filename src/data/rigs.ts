@@ -29,6 +29,7 @@ export const RIGS: Record<string, RigConfig> = {
   merchant: { skin: "#e8c29a", torso: "#2c6b4a", legs: "#4a4f58", feet: "#1c2026" },
   blacksmith: { skin: "#d8a87a", torso: "#444a52", legs: "#3a3f46", feet: "#1c2026", eye: "#ff6622" },
   guard: { skin: "#e8c29a", torso: "#3a4452", legs: "#2c333d", feet: "#15181d", eye: "#9aa6bf" },
+  seer: { skin: "#e8c29a", torso: "#4a3a7a", legs: "#332856", feet: "#1a1430", eye: "#c9b6ff" },
 
   // mobs — each kind gets its own silhouette
   zombie: {

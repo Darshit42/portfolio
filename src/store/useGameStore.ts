@@ -59,6 +59,7 @@ export interface GameState {
   activeSkills: boolean; // skill-tree shrine panel open
   activeSkillLabel: string | null; // title of the structure that opened it
   activeTraveler: string | null; // traveler id — the open tavern Q&A
+  activeSpire: boolean; // the Spire's own-voice Chronicle panel open
 
   /** What the player is currently standing next to (drives the prompt). */
   nearby: Interactable | null;
@@ -105,6 +106,7 @@ export interface GameState {
   openGate: () => void;
   openSkills: (label?: string) => void;
   openTraveler: (id: string) => void;
+  openSpire: () => void;
   /** Acts on whatever the player is standing next to (keyboard E or tap). */
   triggerInteract: () => void;
   closeOverlay: () => void;
@@ -154,6 +156,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   activeSkills: false,
   activeSkillLabel: null,
   activeTraveler: null,
+  activeSpire: false,
 
   nearby: null,
   travelTarget: null,
@@ -211,6 +214,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   // The traveler Q&A rides the "dialog" mode (frozen input) but its own overlay.
   openTraveler: (id) => set({ mode: "dialog", activeTraveler: id, activeDialog: null }),
 
+  // The Spire's own-voice Chronicle (timeline + current work) — opened by the seer.
+  openSpire: () =>
+    set({ mode: "codex", activeSpire: true, activeSkills: false, activeGate: false, activeGuild: null, activeCodex: null, activeForge: false, activeDialog: null }),
+
   triggerInteract: () => {
     const n = get().nearby;
     if (!n) return;
@@ -250,6 +257,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       activeGate: false,
       activeSkills: false,
       activeTraveler: null,
+      activeSpire: false,
     }),
 
   toggleHelp: () => {

@@ -11,6 +11,7 @@ import CodexModal from "../ui/CodexModal";
 import CodexListModal from "../ui/CodexListModal";
 import ContactModal from "../ui/ContactModal";
 import SkillTreePanel from "../ui/SkillTreePanel";
+import SpireChronicle from "../ui/SpireChronicle";
 import AgentInspector from "../ui/AgentInspector";
 import LiveControl from "../ui/LiveControl";
 import MarketReadout from "../ui/MarketReadout";
@@ -43,6 +44,7 @@ export default function GameRoot() {
   const activeCodex = useGameStore((s) => s.activeCodex);
   const activeGuild = useGameStore((s) => s.activeGuild);
   const activeTraveler = useGameStore((s) => s.activeTraveler);
+  const activeSpire = useGameStore((s) => s.activeSpire);
   const touch = useMemo(() => isTouchDevice(), []);
 
   // Stable handlers — read fresh state via getState so the effect never re-binds.
@@ -127,6 +129,8 @@ export default function GameRoot() {
           <ContactModal />
         ) : activeSkills ? (
           <SkillTreePanel />
+        ) : activeSpire ? (
+          <SpireChronicle />
         ) : activeCodex ? (
           <CodexModal />
         ) : activeGuild ? (

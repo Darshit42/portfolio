@@ -47,22 +47,6 @@ export interface Project {
 
 export const PROJECTS: Project[] = [
   {
-    id: "self-healing-agent",
-    name: "Self-Healing Agent",
-    tier: "flagship",
-    category: "ai-agents",
-    oneLiner: "An agent that finds, fixes and ships GitHub issues on its own.",
-    blurb:
-      "An autonomous engineering agent that resolves real GitHub issues unattended: it clones the repo, localizes the fault, generates a patch with a GRPO-trained policy, verifies against the test suite, opens a pull request, and learns from the reward. It runs continuously on a tmux/systemd runtime — no human in the loop.",
-    stack: ["LangGraph", "GRPO", "LoRA", "vLLM", "Python", "systemd"],
-    links: [
-      // TODO(launch): point at the real repo once public.
-      { label: "GitHub", url: "https://github.com/Darshit42", kind: "github", unverified: true },
-    ],
-    demo: { type: "forge-live" },
-    accent: "#ff7a3c",
-  },
-  {
     id: "kubestellar-kyverno",
     name: "KubeStellar + Kyverno",
     tier: "open source",

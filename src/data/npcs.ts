@@ -30,6 +30,8 @@ export interface Npc {
   lines: NpcDialogLine[];
   /** If set, the lines are spoken aloud via TTS (F21). Used by the Oracle. */
   speaks?: boolean;
+  /** If set, the dialog branches into the Spire's own-voice Chronicle panel. */
+  opensSpire?: boolean;
 }
 
 export const NPCS: Npc[] = [
@@ -133,6 +135,26 @@ export const NPCS: Npc[] = [
       { text: "Prove yourself at each guild, traveller, and the way south is yours." },
     ],
   },
+  // The wizard-seer of the Spire interior — Darshit's own voice. Static lines
+  // (reuses the dialog system, no LLM), branching into the Chronicle panel.
+  ...(FEATURES.interiors
+    ? ([
+        {
+          id: "seer",
+          name: "The Seer",
+          building: "spire-of-training",
+          position: [159, 1.5], // inside the spire room (center [160,0])
+          facing: Math.atan2(15, 18),
+          accent: "#9b8cff",
+          opensSpire: true,
+          lines: [
+            { text: "You climbed the Spire. Good — most only ever look up at it." },
+            { text: "This place keeps my own record: the road that brought me here, and what I'm forging now. No polish, no myth." },
+            { text: "Read the Chronicle, if you want the honest version." },
+          ],
+        },
+      ] satisfies Npc[])
+    : []),
 ];
 
 export const npcById = (id: string): Npc | undefined =>

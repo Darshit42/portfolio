@@ -12,7 +12,7 @@
 export interface InteriorRoom {
   id: string;
   buildingId: string;
-  kind: "tavern" | "forge";
+  kind: "tavern" | "forge" | "spire";
   label: string;
   /** Room center, [x, z]. */
   center: [number, number];
@@ -49,6 +49,18 @@ export const INTERIOR_ROOMS: InteriorRoom[] = [
     floorColor: "#23222b",
     wallColor: "#1c2230",
     accent: "#ff7a3c",
+  },
+  {
+    id: "spire-room",
+    buildingId: "spire-of-training",
+    kind: "spire",
+    label: "Spire of Training — inside",
+    center: [160, 0],
+    half: [8, 6.5],
+    doorX: 158,
+    floorColor: "#221d33",
+    wallColor: "#2a2340",
+    accent: "#9b8cff",
   },
 ];
 
@@ -94,6 +106,21 @@ export const DOORS: Door[] = [
     position: [158, -54.6],
     target: [28, 6.8],
   },
+  // Spire (exterior door at the building's approach point)
+  {
+    id: "spire-enter",
+    prompt: "Enter the Spire",
+    label: "Spire of Training",
+    position: [-19, -16],
+    target: [157.5, 3.5],
+  },
+  {
+    id: "spire-exit",
+    prompt: "Step outside",
+    label: "Spire door",
+    position: [158, 5.4],
+    target: [-19, -14],
+  },
 ];
 
 /** Solid props inside rooms (the only interior collision besides the zone). */
@@ -108,4 +135,9 @@ export const PROP_COLLIDERS: { center: [number, number]; half: [number, number] 
   { center: [159, -59.5], half: [0.8, 0.5] }, // anvil
   { center: [154.2, -61], half: [0.8, 1.8] }, // workbench
   { center: [164.5, -57.5], half: [0.6, 0.6] }, // quench barrel
+  // spire
+  { center: [156, -5.2], half: [2.2, 0.5] }, // west bookshelf (north wall)
+  { center: [163.5, -5.2], half: [2.2, 0.5] }, // east bookshelf (north wall)
+  { center: [153.6, 0], half: [0.5, 2.4] }, // tall shelf (west wall)
+  { center: [164.4, 2.4], half: [0.9, 0.7] }, // current-work lectern
 ];

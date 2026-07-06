@@ -40,7 +40,7 @@ export interface Owner {
 export const OWNER: Owner = {
   name: "Darshit Sengra",
   role: "Forward Deployed Engineer · AI / full-stack",
-  bio: "I build autonomous agents, ML pipelines, and full-stack products — from a causal SRE platform to self-healing engineering agents. This realm is my portfolio: every building below enshrines a project you can inspect.",
+  bio: "I build autonomous agents, ML pipelines, and full-stack products — from a causal SRE platform to real-time voice agents. This realm is my portfolio: every building below enshrines a project you can inspect.",
   github: "https://github.com/Darshit42",
   email: "darshit02736@gmail.com",
   resumeUrl: "/resume.pdf",
