@@ -27,8 +27,11 @@ export interface SpireChapter {
 
 export interface CurrentWork {
   name: string;
+  /** One-line hook shown under the name. */
+  tagline?: string;
   /** First person — what it is and where it stands right now. */
   detail: string;
+  stack?: string[];
   link?: { label: string; url: string };
 }
 
@@ -83,14 +86,18 @@ export const CHAPTERS: SpireChapter[] = [
 /** The seer's hard-truth report — what I'm building right now. */
 export const CURRENT_WORK: CurrentWork[] = [
   {
-    name: "Finddder",
+    name: "Apiary",
+    tagline: "An autonomous coding-agent fleet that fixes bounded issues and opens PRs — never merging on its own.",
     detail:
-      "An internship & opportunity tracker that scrapes listings, ranks them, and surfaces the best matches behind a typed API and a fast React front end. Actively building.",
-    link: { label: "GitHub", url: "https://github.com/Darshit42/finddrrr" },
+      "My main build right now. Apiary scans a repository's issues, decides which are safe for an AI to touch, dispatches ephemeral Claude agents to fix the bounded ones — broken CSS, dead buttons, contained bugs — in isolated git worktrees, and opens pull requests for human review; it never merges on its own. The spine is a deterministic control plane (bash + systemd + SQLite) that does the scanning, gating, atomic race-proof issue-leasing and diff-level enforcement in code — the LLM is used only for the actual fix. The principle is \"gates are code, not prompts\": safety never depends on the model behaving. It's built as a multi-tenant SaaS with structurally-enforced org isolation (a cross-tenant leak is impossible at the data layer, not just filtered) and Fernet-encrypted credentials, behind a read-only fleet dashboard. Honest stage: the engine works and the single-tenant autonomous loop is proven end-to-end on a live EC2 server — a real agent fixed a real bug and opened a real PR through the enforcer — with the per-tenant execution model and billing the remaining pieces before it serves paying clients.",
+    stack: ["Bash", "systemd", "SQLite", "FastAPI", "Postgres", "React/TS", "Claude", "AWS"],
   },
   {
-    name: "Apiary",
+    name: "Finddder",
+    tagline: "An internship & opportunity tracker that scrapes, ranks, and surfaces roles.",
     detail:
-      "TODO(darshit): one honest line on what Apiary is and where it stands — I'll write it up truthfully once you tell me.",
+      "An internship and opportunity tracker that scrapes listings, ranks them, and surfaces the best matches behind a typed API and a fast React front end. Actively building.",
+    stack: ["React", "TypeScript", "FastAPI", "Python"],
+    link: { label: "GitHub", url: "https://github.com/Darshit42/finddrrr" },
   },
 ];

@@ -34,21 +34,39 @@ export default function SpireChronicle() {
         >
           What I'm building now
         </h3>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-2.5">
           {CURRENT_WORK.map((w) => (
             <div
               key={w.name}
-              className="rounded-xl border border-realm-edge bg-realm-bg/50 p-3"
+              className="rounded-xl border border-realm-edge bg-realm-bg/50 p-3.5"
               style={{ boxShadow: `inset 0 2px 0 ${accent}55` }}
             >
-              <div className="font-display font-bold text-realm-text">{w.name}</div>
-              <p className="mt-1 text-[13px] leading-relaxed text-realm-muted">{w.detail}</p>
+              <div className="font-display text-[15px] font-bold text-realm-text">{w.name}</div>
+              {w.tagline && (
+                <p className="mt-0.5 text-[13px] font-medium" style={{ color: accent }}>
+                  {w.tagline}
+                </p>
+              )}
+              <p className="mt-1.5 text-[13px] leading-relaxed text-realm-muted">{w.detail}</p>
+              {w.stack && w.stack.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {w.stack.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded px-1.5 py-0.5 font-mono text-[10px] text-realm-muted"
+                      style={{ background: `${accent}18` }}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
               {w.link && (
                 <a
                   href={w.link.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1.5 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
+                  className="mt-2 inline-flex items-center gap-1 text-xs font-semibold hover:underline"
                   style={{ color: accent }}
                 >
                   {w.link.label}
