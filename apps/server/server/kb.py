@@ -103,6 +103,15 @@ def _digest(kb: dict[str, Any]) -> str:
             lines.append(head)
             if w.get("detail"):
                 lines.append(f"    {w['detail']}")
+        lines.append("")
+
+    hobbies = kb.get("hobbies") or {}
+    if hobbies.get("summary") or hobbies.get("items"):
+        lines.append("# The person behind the work (hobbies, off-hours)")
+        if hobbies.get("summary"):
+            lines.append(hobbies["summary"])
+        if hobbies.get("items"):
+            lines.append("In short: " + ", ".join(hobbies["items"]) + ".")
 
     return "\n".join(lines).strip()
 

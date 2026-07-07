@@ -6,7 +6,7 @@
  * with esbuild and writes `public/kb.json`, which the Python backend reads. Keep
  * it dependency-light (data modules only) so the bundle stays trivial.
  */
-import { OWNER, ACCOMPLISHMENTS } from "./config";
+import { OWNER, ACCOMPLISHMENTS, HOBBIES } from "./config";
 import { PROJECTS } from "./projects";
 import { CATEGORIES } from "./categories";
 import { SKILLS } from "./skills";
@@ -20,6 +20,7 @@ export interface Kb {
   skills: { label: string }[];
   timeline: { era: string; title: string; blurb: string }[];
   currentWork: { name: string; tagline?: string; detail: string }[];
+  hobbies: { summary: string; items: string[] };
 }
 
 export function buildKb(): Kb {
@@ -50,5 +51,6 @@ export function buildKb(): Kb {
       ...(w.tagline ? { tagline: w.tagline } : {}),
       detail: w.detail,
     })),
+    hobbies: { summary: HOBBIES.summary, items: [...HOBBIES.items] },
   };
 }

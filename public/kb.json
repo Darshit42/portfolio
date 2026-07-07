@@ -448,5 +448,16 @@
       "tagline": "An internship & opportunity tracker that scrapes, ranks, and surfaces roles.",
       "detail": "An internship and opportunity tracker that scrapes listings, ranks them, and surfaces the best matches behind a typed API and a fast React front end. Actively building."
     }
-  ]
+  ],
+  "hobbies": {
+    "summary": "Away from the keyboard: he plays guitar, sings, and plays piano; he writes poetry and sketches; and he cooks.",
+    "items": [
+      "guitar",
+      "singing",
+      "piano",
+      "poetry",
+      "sketching",
+      "cooking"
+    ]
+  }
 }

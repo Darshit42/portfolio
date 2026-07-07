@@ -75,20 +75,18 @@ function TravelerFigure({
 
       <CharacterRig config={config} ctrl={ctrl.current} />
 
-      {/* interact marker for the worldly traveler */}
-      {traveler.worldly && (
-        <group ref={marker} position={[0, 2.9, 0]}>
-          <mesh scale={near ? 1.3 : 1}>
-            <octahedronGeometry args={[0.22, 0]} />
-            <meshStandardMaterial
-              color={traveler.accent}
-              emissive={traveler.accent}
-              emissiveIntensity={near ? 2 : 1.1}
-              toneMapped={false}
-            />
-          </mesh>
-        </group>
-      )}
+      {/* interact marker — every traveler is chattable */}
+      <group ref={marker} position={[0, 2.9, 0]}>
+        <mesh scale={near ? 1.3 : 1}>
+          <octahedronGeometry args={[0.22, 0]} />
+          <meshStandardMaterial
+            color={traveler.accent}
+            emissive={traveler.accent}
+            emissiveIntensity={near ? 2 : 1.1}
+            toneMapped={false}
+          />
+        </mesh>
+      </group>
 
       {/* baked ambient speech bubble */}
       {bubble && (

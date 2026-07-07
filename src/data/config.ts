@@ -58,6 +58,16 @@ export interface Accomplishment {
   when?: string;
 }
 
+/**
+ * The person behind the work — hobbies/interests (own, non-technical). Used by
+ * the tavern's "muse" traveler, who speaks to Darshit's creative, off-hours side.
+ */
+export const HOBBIES = {
+  summary:
+    "Away from the keyboard: he plays guitar, sings, and plays piano; he writes poetry and sketches; and he cooks.",
+  items: ["guitar", "singing", "piano", "poetry", "sketching", "cooking"],
+} as const;
+
 export const ACCOMPLISHMENTS: Accomplishment[] = [
   {
     title: "Hackathon Winner — Polaris & Google for Developers",
