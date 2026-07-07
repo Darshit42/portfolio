@@ -14,11 +14,15 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
+import os
+from pathlib import Path
 from typing import Any
 
 from .config import REPO_ROOT
 
-KB_PATH = REPO_ROOT / "public" / "kb.json"
+# Defaults to <repo>/public/kb.json (resolved from this file, so CWD-independent),
+# overridable via KB_PATH for hosts that lay the repo out differently.
+KB_PATH = Path(os.environ["KB_PATH"]) if os.environ.get("KB_PATH") else REPO_ROOT / "public" / "kb.json"
 
 
 @lru_cache(maxsize=1)

@@ -1,0 +1,33 @@
+# Render Blueprint — the Devhalla backend (FastAPI, holds the Gemini key).
+# Deploy: Render dashboard → New → Blueprint → point at this repo. Then set the
+# two secret env vars (GEMINI_API_KEY, TAVERN_ALLOWED_ORIGINS) in the dashboard.
+#
+# The frontend (Vercel) is deployed separately; set VITE_AGENT_SERVER there to
+# this service's URL (https://devhalla-api.onrender.com or your chosen name).
+services:
+  - type: web
+    name: devhalla-api
+    runtime: python
+    plan: free
+    rootDir: apps/server
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m server serve --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      # live Q&A on whenever the key is present (guardrails stay active)
+      - key: TAVERN_QA_ENABLED
+        value: "1"
+      # keep the public endpoint honest — tighten if abused
+      - key: TAVERN_RATE_PER_MIN
+        value: "5"
+      - key: TAVERN_ANSWER_TIMEOUT
+        value: "9"
+      # --- secrets: set these in the Render dashboard, never committed ---
+      - key: GEMINI_API_KEY
+        sync: false
+      # comma-separated; set to your Vercel URL, e.g. https://devhalla.vercel.app
+      - key: TAVERN_ALLOWED_ORIGINS
+        sync: false
