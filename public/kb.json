@@ -409,5 +409,44 @@
     {
       "label": "WebSockets"
     }
+  ],
+  "timeline": [
+    {
+      "era": "The grind",
+      "title": "Cutting my teeth",
+      "blurb": "Before any title, there were the reps — 450+ algorithmic problems on LeetCode. That's where I learned hard problems yield to patience and pattern, not cleverness."
+    },
+    {
+      "era": "Into the open",
+      "title": "First merges in the open",
+      "blurb": "I earned my way into CNCF work through the LFX program: 10+ merged pull requests and 25+ issues across KubeStellar and Kyverno, mentor-endorsed. I learned to read a codebase I didn't write and ship into it — in public."
+    },
+    {
+      "era": "Production",
+      "title": "Voices in the wire — revRAG",
+      "blurb": "At revRAG.ai I built production real-time voice agents: speech and telephony triggering, plus consent and OTP flows over WebSockets. Real users, real uptime — the kind of work that has to answer the phone at 3am."
+    },
+    {
+      "era": "Feb 2025",
+      "title": "First place, real stakes",
+      "blurb": "A women's safety application took 1st at the Polaris & Google for Developers hackathon — building something that actually matters, fast, with a team."
+    },
+    {
+      "era": "2026",
+      "title": "Against the world's quants",
+      "blurb": "Team \"Cornflakes\" finished in the top 20% globally in Stage 1 of the WorldQuant International Quant Championship — proof the pattern-work pays off under pressure."
+    }
+  ],
+  "currentWork": [
+    {
+      "name": "Apiary",
+      "tagline": "An autonomous coding-agent fleet that fixes bounded issues and opens PRs — never merging on its own.",
+      "detail": "My main build right now. A deterministic control plane gates which issues are safe and dispatches ephemeral Claude agents to fix the bounded ones in isolated worktrees, the LLM only writes the fix, so safety is code, not prompts. Multi-tenant SaaS with structurally-enforced org isolation."
+    },
+    {
+      "name": "Finddder",
+      "tagline": "An internship & opportunity tracker that scrapes, ranks, and surfaces roles.",
+      "detail": "An internship and opportunity tracker that scrapes listings, ranks them, and surfaces the best matches behind a typed API and a fast React front end. Actively building."
+    }
   ]
 }

@@ -64,13 +64,13 @@ class Config:
     live_token_budget: int = _int("LIVE_TOKEN_BUDGET", 50_000)
     live_timeout_seconds: int = _int("LIVE_TIMEOUT_SECONDS", 600)
 
-    # --- tavern Q&A (the worldly traveler) — off by design ---
-    # A separate, independently gated live feature: one guarded endpoint that
-    # answers a player's typed question in character, grounded in the KB. OFF
-    # unless TAVERN_QA_ENABLED is truthy AND a Gemini key is present, so the
-    # shipped static site never calls it until a server is deployed on purpose.
-    tavern_qa_enabled: bool = os.environ.get("TAVERN_QA_ENABLED", "").strip() in ("1", "true", "yes")
-    tavern_answer_max_tokens: int = _int("TAVERN_ANSWER_MAX_TOKENS", 220)
+    # --- in-character NPC/traveler Q&A ---
+    # One guarded endpoint answers a player's typed question in the voice of the
+    # NPC they're talking to, grounded in the KB. LIVE whenever a Gemini key is
+    # present (default on); set TAVERN_QA_ENABLED=0 to force it off. The key is
+    # read here, server-side only — it never reaches the browser bundle.
+    tavern_qa_enabled: bool = os.environ.get("TAVERN_QA_ENABLED", "1").strip() not in ("0", "false", "no")
+    tavern_answer_max_tokens: int = _int("TAVERN_ANSWER_MAX_TOKENS", 260)
     tavern_answer_timeout: float = float(_int("TAVERN_ANSWER_TIMEOUT", 9))
     tavern_question_max_chars: int = _int("TAVERN_QUESTION_MAX_CHARS", 280)
     tavern_rate_per_min: int = _int("TAVERN_RATE_PER_MIN", 5)

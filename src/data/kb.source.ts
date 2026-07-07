@@ -10,6 +10,7 @@ import { OWNER, ACCOMPLISHMENTS } from "./config";
 import { PROJECTS } from "./projects";
 import { CATEGORIES } from "./categories";
 import { SKILLS } from "./skills";
+import { CHAPTERS, CURRENT_WORK } from "./spire";
 
 export interface Kb {
   owner: { name: string; role: string; bio: string; github: string };
@@ -17,6 +18,8 @@ export interface Kb {
   projects: { name: string; tier: string; oneLiner: string; blurb: string; stack: string[] }[];
   guilds: { guildName: string; tagline: string }[];
   skills: { label: string }[];
+  timeline: { era: string; title: string; blurb: string }[];
+  currentWork: { name: string; tagline?: string; detail: string }[];
 }
 
 export function buildKb(): Kb {
@@ -41,5 +44,11 @@ export function buildKb(): Kb {
     })),
     guilds: CATEGORIES.map((c) => ({ guildName: c.guildName, tagline: c.tagline })),
     skills: SKILLS.map((s) => ({ label: s.label })),
+    timeline: CHAPTERS.map((c) => ({ era: c.era, title: c.title, blurb: c.blurb })),
+    currentWork: CURRENT_WORK.map((w) => ({
+      name: w.name,
+      ...(w.tagline ? { tagline: w.tagline } : {}),
+      detail: w.detail,
+    })),
   };
 }

@@ -23,6 +23,7 @@ from typing import Deque
 from . import kb
 from .config import CONFIG
 from .llm import LLM, BudgetExceeded, TokenMeter
+from .personas import persona_for
 
 
 class _RateLimiter:
@@ -56,8 +57,9 @@ class _RateLimiter:
 _LIMITER = _RateLimiter(CONFIG.tavern_rate_per_min, CONFIG.tavern_rate_per_hour)
 
 
-def answer_question(ip: str, question: str) -> dict:
-    """Blocking; run under a thread + wall-clock timeout by the async route."""
+def answer_question(ip: str, question: str, agent_id: str = "") -> dict:
+    """Blocking; run under a thread + wall-clock timeout by the async route.
+    ``agent_id`` selects the in-character voice (see personas.py)."""
     if not CONFIG.tavern_qa_enabled:
         return {"ok": False, "reason": "disabled"}
     if not CONFIG.has_key:
@@ -77,7 +79,8 @@ def answer_question(ip: str, question: str) -> dict:
     if llm.offline:  # key present but SDK/init failed → degrade
         return {"ok": False, "reason": "offline"}
 
-    prompt = kb.build_prompt(q)
+    persona = persona_for(agent_id)
+    prompt = kb.build_prompt(q, persona.name, persona.framing)
     try:
         text = llm.complete(
             prompt,

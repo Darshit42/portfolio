@@ -1,17 +1,16 @@
 /**
- * Worldly-traveler Q&A client — the ONLY live call the tavern makes, and only
- * on an explicit player submit (never on load, enter, or a timer).
+ * In-character NPC/traveler chat client — a live call fires ONLY on an explicit
+ * player submit (never on load, enter, or a timer).
  *
  * It calls OUR backend endpoint by URL; the Gemini key lives server-side and
  * never touches this bundle. Every failure path (feature off, no server, network
  * error, timeout, rate-limited, kill-switched, keyless) resolves to `ok: false`
- * so the UI shows a baked in-character deflection — the tavern never hangs or
- * shows an error wall.
+ * so the UI can show an honest "can't reach them" note — never an error wall.
  */
 import { FEATURES } from "../data/config";
 
 const BASE = (import.meta.env.VITE_AGENT_SERVER as string | undefined)?.replace(/\/$/, "") ||
-  "http://localhost:8000";
+  "http://localhost:8001";
 
 const TIMEOUT_MS = 11_000; // a hair above the server's own timeout
 
@@ -36,9 +35,9 @@ function sessionId(): string {
   return id;
 }
 
-export async function askTraveler(question: string): Promise<AskResult> {
-  // Guardrail: no call at all unless the feature is explicitly enabled.
-  if (!FEATURES.tavernLiveQA) return { ok: false, reason: "disabled" };
+export async function askAgent(agentId: string, question: string): Promise<AskResult> {
+  // Guardrail: no call at all unless the feature is enabled.
+  if (!FEATURES.liveNpcChat) return { ok: false, reason: "disabled" };
   const q = question.trim();
   if (!q) return { ok: false, reason: "empty" };
 
@@ -48,7 +47,7 @@ export async function askTraveler(question: string): Promise<AskResult> {
     const res = await fetch(`${BASE}/ask`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q, sessionId: sessionId() }),
+      body: JSON.stringify({ question: q, agentId, sessionId: sessionId() }),
       signal: ctrl.signal,
     });
     if (!res.ok) return { ok: false, reason: `http_${res.status}` };

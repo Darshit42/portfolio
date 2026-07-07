@@ -92,7 +92,7 @@ export const FEATURES = {
   minimap: true, //   P1 (F19)
   tts: true, //       P1 (F21) — Voice Oracle reads its blurb
   liveAgentWs: false, // P2 (F24) — real agent feed over WebSocket
-  tavernLiveQA: false, // P2 — worldly traveler live Q&A (needs a deployed server + VITE_AGENT_SERVER); baked chatter otherwise
+  liveNpcChat: true, // every NPC/traveler answers via Gemini through the backend (needs apps/server running + a key); honest "unreachable" note otherwise
   localSave: true, //  P2 (F22)
   particles: true, //  P2 (F23) — cheap glow/sparks, always gated by reduced-motion
   // OFF: the bloom composer needs a half-float HDR target; on GPUs/drivers that

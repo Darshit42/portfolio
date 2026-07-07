@@ -15,8 +15,7 @@ import SpireChronicle from "../ui/SpireChronicle";
 import AgentInspector from "../ui/AgentInspector";
 import LiveControl from "../ui/LiveControl";
 import MarketReadout from "../ui/MarketReadout";
-import DialogBox from "../ui/DialogBox";
-import TravelerChat from "../ui/TravelerChat";
+import NpcChat from "../ui/NpcChat";
 import InventoryPanel from "../ui/InventoryPanel";
 import FastTravel from "../ui/FastTravel";
 import HelpOverlay from "../ui/HelpOverlay";
@@ -43,7 +42,6 @@ export default function GameRoot() {
   const activeSkills = useGameStore((s) => s.activeSkills);
   const activeCodex = useGameStore((s) => s.activeCodex);
   const activeGuild = useGameStore((s) => s.activeGuild);
-  const activeTraveler = useGameStore((s) => s.activeTraveler);
   const activeSpire = useGameStore((s) => s.activeSpire);
   const touch = useMemo(() => isTouchDevice(), []);
 
@@ -136,7 +134,7 @@ export default function GameRoot() {
         ) : activeGuild ? (
           <CodexListModal />
         ) : null)}
-      {mode === "dialog" && (activeTraveler ? <TravelerChat /> : <DialogBox />)}
+      {mode === "dialog" && <NpcChat />}
       {mode === "inventory" && <InventoryPanel />}
       {mode === "fasttravel" && <FastTravel />}
       {mode === "help" && <HelpOverlay touch={touch} />}

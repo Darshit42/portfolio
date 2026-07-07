@@ -67,12 +67,13 @@ def _build_app():
         except Exception:
             payload = {}
         question = str(payload.get("question", "")) if isinstance(payload, dict) else ""
+        agent_id = str(payload.get("agentId", "")) if isinstance(payload, dict) else ""
         # Prefer the proxy-forwarded client IP when deployed behind one.
         fwd = request.headers.get("x-forwarded-for", "")
         ip = fwd.split(",")[0].strip() if fwd else (request.client.host if request.client else "anon")
         try:
             return await asyncio.wait_for(
-                asyncio.get_event_loop().run_in_executor(None, answer_question, ip, question),
+                asyncio.get_event_loop().run_in_executor(None, answer_question, ip, question, agent_id),
                 timeout=CONFIG.tavern_answer_timeout + 3.0,
             )
         except asyncio.TimeoutError:
