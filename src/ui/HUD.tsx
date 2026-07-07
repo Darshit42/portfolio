@@ -3,6 +3,7 @@ import { questHint } from "../data/quests";
 import { FEATURES } from "../data/config";
 import { ARENA_WAVES, useGameStore } from "../store/useGameStore";
 import { RelicIcon } from "./icons";
+import MarketReadout from "./MarketReadout";
 
 /** Sigil tracker + main-quest hint (F7) + health/arena (combat). Top-left. */
 export default function HUD() {
@@ -53,6 +54,9 @@ export default function HUD() {
       <div className="panel max-w-[260px] rounded-lg px-3 py-1.5 text-xs text-realm-muted">
         {questHint(n)}
       </div>
+
+      {/* Market ticker stacks in-flow here so it never overlaps the panels above. */}
+      {FEATURES.agentTown && <MarketReadout />}
     </div>
   );
 }

@@ -26,7 +26,7 @@ export default function MarketReadout() {
   if (!FEATURES.agentTown || !ready || items.length === 0) return null;
 
   return (
-    <div className="pointer-events-none absolute left-3 top-20 z-20 select-none">
+    <div className="pointer-events-none select-none">
       <div className="rounded-lg border border-realm-edge bg-realm-bg/80 px-2.5 py-1.5 backdrop-blur-sm">
         <div className="mb-1 text-[10px] uppercase tracking-wider text-realm-muted/80">Market</div>
         <div className="flex flex-col gap-0.5">
