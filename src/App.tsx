@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { useGameStore } from "./store/useGameStore";
 import { detectWebGL } from "./game/webgl";
 import { WORLD_NAME } from "./data/config";
@@ -19,17 +20,30 @@ export default function App() {
     if (!detectWebGL()) setWebglFailed();
   }, [setWebglFailed]);
 
-  if (mode === "title") return <TitleScreen />;
-  if (mode === "recruiter") return <RecruiterMode />;
+  if (mode === "title") return (
+    <>
+      <TitleScreen />
+      <Analytics />
+    </>
+  );
+  if (mode === "recruiter") return (
+    <>
+      <RecruiterMode />
+      <Analytics />
+    </>
+  );
 
   // Any world-family mode: mount the 3D world, with Recruiter Mode as the
   // crash/WebGL-loss fallback so we never white-screen.
   return (
-    <ErrorBoundary onError={setWebglFailed} fallback={<RecruiterMode />}>
-      <Suspense fallback={<LoadingRealm />}>
-        <GameRoot />
-      </Suspense>
-    </ErrorBoundary>
+    <>
+      <ErrorBoundary onError={setWebglFailed} fallback={<RecruiterMode />}>
+        <Suspense fallback={<LoadingRealm />}>
+          <GameRoot />
+        </Suspense>
+      </ErrorBoundary>
+      <Analytics />
+    </>
   );
 }
 
