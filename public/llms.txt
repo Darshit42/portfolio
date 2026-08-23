@@ -4,12 +4,12 @@
 
 Darshit Sengra is a software engineer specialising in AI agents, machine learning
 pipelines, and full-stack product engineering. This file is the machine-readable
-digest of https://darshit.wtf; the human site is a playable 3D RPG world called Devhalla,
+digest of https://www.darshit.wtf; the human site is a playable 3D RPG world called Devhalla,
 where every project is a building you can walk into.
 
-- Site: https://darshit.wtf
-- Resume (PDF): https://darshit.wtf/resume.pdf
-- Plain-HTML resume and project index: https://darshit.wtf/resume.html
+- Site: https://www.darshit.wtf
+- Resume (PDF): https://www.darshit.wtf/resume.pdf
+- Plain-HTML resume and project index: https://www.darshit.wtf/resume.html
 - GitHub: https://github.com/Darshit42
 - Email: darshit02736@gmail.com
 
@@ -233,4 +233,4 @@ Apiary — An autonomous coding-agent fleet that fixes bounded issues and opens 
 Python, AI / ML, Reinforcement Learning, LLM Engineering, GRPO, LoRA, vLLM, SFT, TypeScript, Frontend, React, Three.js / R3F, Go, Cloud / CNCF, Kubernetes, KubeStellar, Kyverno, Node.js, Backend / APIs, FastAPI, Realtime, LiveKit, WebSockets.
 
 ### How do I contact Darshit Sengra?
-By email at darshit02736@gmail.com, or through GitHub at https://github.com/Darshit42. A downloadable resume (PDF) is at https://darshit.wtf/resume.pdf.
+By email at darshit02736@gmail.com, or through GitHub at https://github.com/Darshit42. A downloadable resume (PDF) is at https://www.darshit.wtf/resume.pdf.
