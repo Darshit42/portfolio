@@ -121,6 +121,14 @@ export default function RecruiterMode() {
         <p className="mt-6 text-center font-mono text-[11px] text-realm-muted/60">
           {WORLD_NAME} — a playable portfolio. Built with React, Three.js & too much coffee.
         </p>
+
+        {/* The static twin of this view (scripts/build-seo.mjs). Linked so it is
+            shareable, printable, and reachable by crawlers that never run JS. */}
+        <p className="mt-2 text-center font-mono text-[11px] text-realm-muted/50">
+          <a href="/resume.html" className="underline-offset-2 hover:text-realm-gold hover:underline">
+            Plain-HTML version of this index
+          </a>
+        </p>
       </div>
     </div>
   );

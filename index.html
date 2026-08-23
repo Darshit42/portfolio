@@ -7,12 +7,68 @@
     <meta name="theme-color" content="#0b0e14" />
     <meta
       name="description"
-      content="Devhalla — a playable RPG world that is the software portfolio of Darshit Sengra. Explore the realm or jump straight to the projects."
+      content="Darshit Sengra is a software engineer building AI agents, ML pipelines and full-stack products. His portfolio is Devhalla — a playable 3D RPG world where every project is a building you can walk into. Projects, resume and contact inside."
     />
-    <meta property="og:title" content="Devhalla — Darshit Sengra's Portfolio" />
-    <meta property="og:description" content="A playable RPG world where every building enshrines a project. Or tap once for the recruiter's index." />
+    <link rel="canonical" href="https://darshit.wtf/" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <meta name="author" content="Darshit Sengra" />
+    <!-- Ignored by Google, but several answer-engine crawlers still read it. -->
+    <meta
+      name="keywords"
+      content="Darshit Sengra, software engineer portfolio, software engineer resume, developer portfolio inspiration, creative portfolio website, 3D portfolio, AI engineer, agent engineering, full-stack developer"
+    />
+    <!-- The JS-free twin of this page: same content, crawlable without WebGL. -->
+    <link rel="alternate" type="text/html" href="https://darshit.wtf/resume.html" title="Plain-HTML resume and project index" />
+
     <meta property="og:type" content="website" />
-    <title>Devhalla — Darshit Sengra's Portfolio</title>
+    <meta property="og:site_name" content="Devhalla" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content="https://darshit.wtf/" />
+    <meta property="og:title" content="Darshit Sengra — Software Engineer Portfolio (Devhalla)" />
+    <meta property="og:description" content="A playable RPG world where every building enshrines a project. Or tap once for the recruiter's index." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Darshit Sengra — Software Engineer Portfolio (Devhalla)" />
+    <meta name="twitter:description" content="A playable 3D RPG world that is a software engineer's portfolio. Walk in, talk to the characters, inspect the projects." />
+
+    <title>Darshit Sengra — Software Engineer Portfolio | Devhalla</title>
+
+    <!-- Identity graph. The full project/FAQ graph lives on /resume.html, which
+         is generated from the same kb.json (scripts/build-seo.mjs). -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://darshit.wtf/#person",
+            "name": "Darshit Sengra",
+            "jobTitle": "Software Engineer",
+            "url": "https://darshit.wtf",
+            "email": "mailto:darshit02736@gmail.com",
+            "sameAs": ["https://github.com/Darshit42"],
+            "description": "Software engineer building autonomous agents, ML pipelines and full-stack products."
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://darshit.wtf/#website",
+            "url": "https://darshit.wtf",
+            "name": "Devhalla — Darshit Sengra's software engineer portfolio",
+            "description": "A playable 3D RPG world that is a software engineering portfolio: every building enshrines a project.",
+            "inLanguage": "en",
+            "publisher": { "@id": "https://darshit.wtf/#person" }
+          },
+          {
+            "@type": "ProfilePage",
+            "@id": "https://darshit.wtf/#profile",
+            "url": "https://darshit.wtf",
+            "isPartOf": { "@id": "https://darshit.wtf/#website" },
+            "about": { "@id": "https://darshit.wtf/#person" },
+            "mainEntity": { "@id": "https://darshit.wtf/#person" }
+          }
+        ]
+      }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -23,18 +79,22 @@
   <body>
     <div id="root"></div>
     <noscript>
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b0e14;color:#e6ebf5;font-family:Georgia,serif;text-align:center;padding:24px">
-        <div>
-          <h1 style="margin:0 0 8px;color:#e8c66a">Devhalla</h1>
-          <p style="margin:0 0 16px;color:#8b97b0">Darshit Sengra's portfolio needs JavaScript to render. The essentials, the fast way:</p>
-          <p style="margin:0">
-            <a href="https://github.com/Darshit42" style="color:#6ad0ff">github.com/Darshit42</a>
-            &nbsp;·&nbsp;
-            <a href="mailto:darshit02736@gmail.com" style="color:#6ad0ff">darshit02736@gmail.com</a>
-            &nbsp;·&nbsp;
-            <a href="/resume.pdf" style="color:#6ad0ff">résumé</a>
-          </p>
-        </div>
+      <div style="min-height:100vh;background:#0b0e14;color:#e6ebf5;font-family:Georgia,serif;padding:24px;max-width:52rem;margin:0 auto">
+        <h1 style="margin:0 0 4px;color:#e8c66a">Darshit Sengra — Software Engineer</h1>
+        <p style="margin:0 0 16px;color:#8b97b0">
+          Devhalla, the 3D portfolio, needs JavaScript. Everything it contains — all
+          projects, skills, honours and contact details — is also on the plain-HTML page below.
+        </p>
+        <p style="margin:0 0 16px">
+          <a href="/resume.html" style="color:#6ad0ff">Resume &amp; full project index (no JavaScript)</a>
+        </p>
+        <p style="margin:0;color:#8b97b0">
+          <a href="https://github.com/Darshit42" style="color:#6ad0ff">github.com/Darshit42</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:darshit02736@gmail.com" style="color:#6ad0ff">darshit02736@gmail.com</a>
+          &nbsp;·&nbsp;
+          <a href="/resume.pdf" style="color:#6ad0ff">résumé (PDF)</a>
+        </p>
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

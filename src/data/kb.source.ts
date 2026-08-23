@@ -6,14 +6,14 @@
  * with esbuild and writes `public/kb.json`, which the Python backend reads. Keep
  * it dependency-light (data modules only) so the bundle stays trivial.
  */
-import { OWNER, ACCOMPLISHMENTS, HOBBIES } from "./config";
+import { OWNER, ACCOMPLISHMENTS, HOBBIES, SITE_URL } from "./config";
 import { PROJECTS } from "./projects";
 import { CATEGORIES } from "./categories";
 import { SKILLS } from "./skills";
 import { CHAPTERS, CURRENT_WORK } from "./spire";
 
 export interface Kb {
-  owner: { name: string; role: string; bio: string; github: string };
+  owner: { name: string; role: string; bio: string; github: string; email: string; site: string };
   accomplishments: { title: string; detail: string; when?: string }[];
   projects: { name: string; tier: string; oneLiner: string; blurb: string; stack: string[] }[];
   guilds: { guildName: string; tagline: string }[];
@@ -30,6 +30,8 @@ export function buildKb(): Kb {
       role: OWNER.role,
       bio: OWNER.bio,
       github: OWNER.github,
+      email: OWNER.email,
+      site: SITE_URL,
     },
     accomplishments: ACCOMPLISHMENTS.map((a) => ({
       title: a.title,

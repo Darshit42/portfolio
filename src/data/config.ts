@@ -5,6 +5,8 @@
  */
 
 export const WORLD_NAME = "Devhalla";
+/** Canonical production origin — used for canonical/OG URLs and the sitemap. */
+export const SITE_URL = "https://darshit.wtf";
 export const WORLD_TAGLINE = "A hall where the legends are the projects.";
 
 /**
