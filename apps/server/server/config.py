@@ -48,6 +48,18 @@ def _int(name: str, default: int) -> int:
         return default
 
 
+# Origins the deployed site is always served from. Baked in so the public API
+# cannot be locked out of its own frontend by an env-var typo; extend via
+# TAVERN_ALLOWED_ORIGINS. Each entry's www/apex twin is added automatically.
+DEFAULT_ORIGINS = [
+    "https://darshit.wtf",
+    "https://devhalla.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://127.0.0.1:5173",
+]
+
+
 @dataclass(frozen=True)
 class Config:
     # --- provider ---
@@ -102,10 +114,54 @@ class Config:
     def has_key(self) -> bool:
         return bool(self.api_key)
 
+    @staticmethod
+    def _normalize_origin(raw: str) -> list[str]:
+        """One configured entry -> the origins a browser could actually send.
+
+        CORS matching is exact string comparison against the ``Origin`` header,
+        so a hand-typed env var that carries a trailing slash, a missing scheme
+        or a stray path silently allows nothing. Tolerate all three, and always
+        add the www/apex twin: visitors reach a site both ways and only one of
+        them would otherwise be allowed.
+        """
+        o = raw.strip().rstrip("/")
+        if not o:
+            return []
+        if o == "*":
+            return ["*"]
+        if "://" not in o:
+            o = "https://" + o
+        scheme, _, rest = o.partition("://")
+        host = rest.split("/", 1)[0]
+        if not host:
+            return []
+        base = f"{scheme}://{host}"
+        if host.startswith(("localhost", "127.")):
+            return [base]
+        twin = host[4:] if host.startswith("www.") else "www." + host
+        return [base, f"{scheme}://{twin}"]
+
     @property
     def allowed_origins(self) -> list[str]:
-        origins = [o.strip() for o in self.allowed_origins_raw.split(",") if o.strip()]
-        return origins or ["*"]
+        """Configured origins, plus the site's own, plus their www/apex twins.
+
+        The production origins are baked in rather than left to the environment:
+        they are not secrets, and a mistyped dashboard value used to lock the
+        real site out of its own API. TAVERN_ALLOWED_ORIGINS still *adds*
+        origins (preview deploys, a second domain); it can no longer subtract.
+        """
+        origins: list[str] = []
+        for part in list(self.allowed_origins_raw.split(",")) + DEFAULT_ORIGINS:
+            for o in self._normalize_origin(part):
+                if o not in origins:
+                    origins.append(o)
+        return origins
+
+    @property
+    def allowed_origin_regex(self) -> str:
+        """Vercel gives every preview deploy its own subdomain — match them all
+        rather than chasing hashes through the dashboard."""
+        return r"https://[a-z0-9-]+\.vercel\.app"
 
     @property
     def tavern_qa_live(self) -> bool:

@@ -40,11 +40,13 @@ def _build_app():
     from sse_starlette.sse import EventSourceResponse
 
     app = FastAPI(title="Agent Town", version="0.1.0")
-    # Lock down to configured origins in production; "*" only when none are set
-    # (local dev). Set TAVERN_ALLOWED_ORIGINS before any public deploy.
+    # Locked to the site's own origins plus anything in TAVERN_ALLOWED_ORIGINS;
+    # the regex additionally covers Vercel preview deploys. CORSMiddleware also
+    # answers the OPTIONS preflight, so no route of ours needs to.
     app.add_middleware(
         CORSMiddleware,
         allow_origins=CONFIG.allowed_origins,
+        allow_origin_regex=CONFIG.allowed_origin_regex,
         allow_methods=["*"],
         allow_headers=["*"],
     )
@@ -53,7 +55,9 @@ def _build_app():
     def health():
         return {"ok": True, "offline": not CONFIG.has_key, "model": CONFIG.model,
                 "maxAgents": CONFIG.live_max_agents, "tokenBudget": CONFIG.live_token_budget,
-                "travelerQa": CONFIG.tavern_qa_live}
+                "travelerQa": CONFIG.tavern_qa_live,
+                # echoed so a CORS misconfig is one curl away from being obvious
+                "allowedOrigins": CONFIG.allowed_origins}
 
     @app.post("/ask")
     async def ask(request: Request):

@@ -28,6 +28,9 @@ services:
       # --- secrets: set these in the Render dashboard, never committed ---
       - key: GEMINI_API_KEY
         sync: false
-      # comma-separated; set to your Vercel URL, e.g. https://devhalla.vercel.app
+      # Comma-separated browser origins allowed to call this API. Not a secret,
+      # so it lives here rather than in the dashboard. The apex/www twin of each
+      # entry is added automatically (see config.Config._normalize_origin), as
+      # is a bare-hostname's https:// scheme. Add Vercel preview URLs here too.
       - key: TAVERN_ALLOWED_ORIGINS
-        sync: false
+        value: "https://darshit.wtf,https://devhalla.vercel.app"
