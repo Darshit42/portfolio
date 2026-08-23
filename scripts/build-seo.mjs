@@ -149,7 +149,12 @@ const resumeHtml = `<!doctype html>
 <meta property="og:title" content="${esc(name)} — ${TITLE} Resume &amp; Portfolio" />
 <meta property="og:description" content="${esc(DESC)}" />
 <meta property="og:url" content="${SITE}/resume.html" />
+<meta property="og:image" content="${SITE}/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Devhalla title screen — ${esc(name)}&#39;s portfolio as a playable RPG world." />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="${SITE}/og.png" />
 <style>
 :root{color-scheme:dark;--bg:#0b0e14;--fg:#e6ebf5;--muted:#8b97b0;--gold:#e8c66a;--edge:#1e2534;--card:#111726}
 *{box-sizing:border-box}
